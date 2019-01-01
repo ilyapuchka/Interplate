@@ -77,6 +77,8 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
             template().parts.forEach(appendLiteral)
         }
 
+        private static let newlinesCharacterSet = CharacterSet(charactersIn: "\u{000A}\u{000D}")
+
         public func appendInterpolation(indent: Int = 4,
                                         with: String = " ",
                                         indentFirstLine: Bool = false,
@@ -85,7 +87,22 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
             var n = 0
             var indented: [String] = []
             let indentation = Array(repeating: with, count: indent).joined()
-            content.enumerateLines { (line, _) in
+
+            // Based on https://github.com/jpsim/SourceKitten/blob/59e8deab7894d93f31d6625bd237fb57e228d4d4/Source/SourceKittenFramework/String%2BSourceKitten.swift#L101
+            func lines() -> [String] {
+                let newlinesCharacterSet = StringInterpolation.newlinesCharacterSet
+                let lineContents = content.components(separatedBy: newlinesCharacterSet)
+                let endsWithNewLineCharacter: Bool
+                if let lastChar = content.utf16.last,
+                    let lastCharScalar = UnicodeScalar(lastChar) {
+                    endsWithNewLineCharacter = newlinesCharacterSet.contains(lastCharScalar)
+                } else {
+                    endsWithNewLineCharacter = false
+                }
+                return endsWithNewLineCharacter ? Array(lineContents.dropLast()) : lineContents
+            }
+
+            lines().forEach { line in
                 indented.append((indentFirstLine == false && n == 0 ? "" : indentation) + line)
                 n += 1
             }
