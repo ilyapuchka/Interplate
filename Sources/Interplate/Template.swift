@@ -45,7 +45,7 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
 
     public class StringInterpolation: StringInterpolationProtocol {
         private(set) var parts: [String]
-        private var trim: CharacterSet? = nil
+        private var trim: (characters: CharacterSet, direction: TrimDirection)? = nil
 
         required public init(literalCapacity: Int, interpolationCount: Int) {
             self.parts = []
@@ -54,11 +54,24 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
 
         public func appendLiteral(_ literal: String) {
             if let trim = trim {
-                self.parts.append(
-                    String(literal.drop {
-                        CharacterSet(charactersIn: String($0)).isSubset(of: trim)
-                    })
-                )
+                if trim.direction.contains(.before), parts.count > 0 {
+                    let lastPart = parts.removeLast()
+                    self.parts.append(
+                        String(lastPart.reversed().drop {
+                            CharacterSet(charactersIn: String($0)).isSubset(of: trim.characters)
+                            }.reversed()
+                        )
+                    )
+                }
+                if trim.direction.contains(.after) {
+                    self.parts.append(
+                        String(literal.drop {
+                            CharacterSet(charactersIn: String($0)).isSubset(of: trim.characters)
+                        })
+                    )
+                } else {
+                    self.parts.append(literal)
+                }
                 self.trim = nil
             } else {
                 self.parts.append(literal)
@@ -153,8 +166,18 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
             appendInterpolation(Template(sourcePath: path) ?? notFound())
         }
 
-        public func appendInterpolation(trim characters: CharacterSet) {
-            trim = characters
+        public struct TrimDirection: OptionSet {
+            public let rawValue: Int
+            public init(rawValue: Int) {
+                self.rawValue = rawValue
+            }
+
+            public static let before = TrimDirection(rawValue: 1 << 0)
+            public static let after = TrimDirection(rawValue: 1 << 1)
+        }
+
+        public func appendInterpolation(trim characters: CharacterSet, _ direction: TrimDirection = .after) {
+            trim = (characters, direction)
         }
     }
 }

@@ -29,8 +29,8 @@ final class InterplateTests: XCTestCase {
     }
 
     func testTrim() {
-        let t: Template = "  \(trim: .whitespaces)  Hello world!  "
-        XCTAssertEqual(t.render(), "  Hello world!  ")
+        let t: Template = "  \(trim: .whitespaces, [.before, .after])  Hello world!  \(trim: .whitespaces, .before)"
+        XCTAssertEqual(t.render(), "Hello world!")
     }
 
     func testInclude() {
