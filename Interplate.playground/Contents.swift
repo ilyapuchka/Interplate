@@ -69,16 +69,22 @@ class NodesRenderer: Renderer {
     init(node: Node) {
         self.node = node
     }
-    override var template: Template {
+
+    func print(_ node: Node) -> Template {
         return """
             node \(node.name) {
-                \(indent: 4, """
-                    \(_trim: .w)\(for: self.node.children, do: { node, loop in
-                        "\(loop.start ? "" : "\n")\(NodesRenderer(node: node).template)"
-                    })
-                """)
+                children = \(node.children.count)
+
+                \( node.children.isEmpty
+                    ? [""]
+                    : node.children.map(print)
+                )
             }
             """
+    }
+
+    override var template: Template {
+        return print(node)
     }
 }
 

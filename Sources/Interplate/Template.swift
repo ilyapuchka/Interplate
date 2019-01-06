@@ -82,12 +82,35 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
             appendLiteral(literal)
         }
 
+        public func appendInterpolation<T: CustomStringConvertible>(_ literal: T) {
+            appendLiteral(literal.description)
+        }
+
         public func appendInterpolation(_ literal: String?, `default`: String = "") {
             appendLiteral(literal ?? `default`)
         }
 
         public func appendInterpolation(_ template: @autoclosure () -> Template) {
-            template().parts.forEach(appendLiteral)
+            appendLiteral(template().parts.joined())
+        }
+
+        public func lastIndentation() -> String {
+            if let lastLineIndentation = self.parts.last?.lines().last?
+                .prefix(while: { CharacterSet(charactersIn: String($0)).isSubset(of: CharacterSet.whitespaces) }) {
+                return String(lastLineIndentation)
+            } else {
+                return ""
+            }
+        }
+
+        public func appendInterpolation(_ templates: [Template],
+                                        separator: String = "\n",
+                                        terminator: String = "\n",
+                                        keepEmptyLines: Bool = true) {
+            let indentation = lastIndentation()
+            let parts = templates.map { $0.parts.joined() }.joined(separator: separator)
+            let content = parts.indent(indentation, indentFirstLine: false, keepEmptyLines: keepEmptyLines)
+            appendLiteral(content)
         }
 
         public func appendInterpolation(indent: Int, with: String = " ") {
@@ -101,7 +124,7 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
         public func appendInterpolation(indent: Int,
                                         with: String = " ",
                                         indentFirstLine: Bool = false,
-                                        keepEmptyLines: Bool = false,
+                                        keepEmptyLines: Bool = true,
                                         _ body: @autoclosure () -> Template) {
             let indented = body().render().indent(
                 indent,
@@ -135,14 +158,22 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
         public func appendInterpolation<T>(for collection: [T],
                                            where predicate: (T) -> Bool = { _ in true },
                                            do body: (T, LoopContext) -> Template,
-                                           empty: @autoclosure () -> Template = "") {
+                                           empty: @autoclosure () -> Template = "",
+                                           join: (LoopContext) -> Template = { _ in "" },
+                                           keepEmptyLines: Bool = false) {
             let c = collection.filter(predicate)
             let loop = LoopContext(length: c.count)
+            let content: String
             if c.count > 0 {
-                c.forEach { appendInterpolation(body($0, loop.next())) }
+                content = c.reduce("", {
+                    let context = loop.next()
+                    return $0 + body($1, context).parts.joined() + join(context).parts.joined()
+                })
             } else {
-                appendInterpolation(empty())
+                content = empty().parts.joined()
             }
+            let indentation = lastIndentation()
+            appendLiteral(content.indent(indentation, indentFirstLine: false, keepEmptyLines: keepEmptyLines))
         }
 
         public func appendInterpolation(include path: String) throws {
@@ -189,10 +220,9 @@ extension String {
         return components(separatedBy: String.newlinesCharacterSet)
     }
 
-    func indent(_ indent: Int = 4, with: String = " ", indentFirstLine: Bool = false, keepEmptyLines: Bool = false) -> String {
+    func indent(_ indentation: String, indentFirstLine: Bool = false, keepEmptyLines: Bool = false) -> String {
         var n = 0
         var indented: [String] = []
-        let indentation = Array(repeating: with, count: indent).joined()
 
         lines().forEach { line in
             if keepEmptyLines || line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
@@ -201,6 +231,11 @@ extension String {
             n += 1
         }
         return indented.joined(separator: "\n")
+    }
+
+    func indent(_ indent: Int = 4, with: String = " ", indentFirstLine: Bool = false, keepEmptyLines: Bool = false) -> String {
+        let indentation = Array(repeating: with, count: indent).joined()
+        return self.indent(indentation, indentFirstLine: indentFirstLine, keepEmptyLines: keepEmptyLines)
     }
 }
 
