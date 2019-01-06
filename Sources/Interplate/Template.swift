@@ -90,36 +90,26 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
             template().parts.forEach(appendLiteral)
         }
 
-        private static let newlinesCharacterSet = CharacterSet(charactersIn: "\u{000A}\u{000D}")
+        public func appendInterpolation(indent: Int, with: String = " ") {
+            appendInterpolation(indent: indent, with: with, indentFirstLine: true, "")
+        }
 
-        public func appendInterpolation(indent: Int = 4,
+        public func appendInterpolation(keepEmptyLines: Bool, _ body: @autoclosure () -> Template) {
+            appendInterpolation(indent: 0, keepEmptyLines: keepEmptyLines, body())
+        }
+
+        public func appendInterpolation(indent: Int,
                                         with: String = " ",
                                         indentFirstLine: Bool = false,
+                                        keepEmptyLines: Bool = false,
                                         _ body: @autoclosure () -> Template) {
-            let content = body().render()
-            var n = 0
-            var indented: [String] = []
-            let indentation = Array(repeating: with, count: indent).joined()
-
-            // Based on https://github.com/jpsim/SourceKitten/blob/59e8deab7894d93f31d6625bd237fb57e228d4d4/Source/SourceKittenFramework/String%2BSourceKitten.swift#L101
-            func lines() -> [String] {
-                let newlinesCharacterSet = StringInterpolation.newlinesCharacterSet
-                let lineContents = content.components(separatedBy: newlinesCharacterSet)
-                let endsWithNewLineCharacter: Bool
-                if let lastChar = content.utf16.last,
-                    let lastCharScalar = UnicodeScalar(lastChar) {
-                    endsWithNewLineCharacter = newlinesCharacterSet.contains(lastCharScalar)
-                } else {
-                    endsWithNewLineCharacter = false
-                }
-                return endsWithNewLineCharacter ? Array(lineContents.dropLast()) : lineContents
-            }
-
-            lines().forEach { line in
-                indented.append((indentFirstLine == false && n == 0 ? "" : indentation) + line)
-                n += 1
-            }
-            appendLiteral(indented.joined(separator: "\n"))
+            let indented = body().render().indent(
+                indent,
+                with: with,
+                indentFirstLine: indentFirstLine,
+                keepEmptyLines: keepEmptyLines
+            )
+            appendLiteral(indented)
         }
 
         public class LoopContext {
@@ -179,5 +169,43 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
         public func appendInterpolation(trim characters: CharacterSet, _ direction: TrimDirection = .after) {
             trim = (characters, direction)
         }
+        public func appendInterpolation(_trim characters: CharacterSet) {
+            trim = (characters, .before)
+        }
+        public func appendInterpolation(trim_ characters: CharacterSet) {
+            trim = (characters, .after)
+        }
+        public func appendInterpolation(_trim_ characters: CharacterSet) {
+            trim = (characters, [.before, .after])
+        }
     }
+}
+
+
+extension String {
+    private static let newlinesCharacterSet = CharacterSet(charactersIn: "\u{000A}\u{000D}")
+
+    func lines() -> [String] {
+        return components(separatedBy: String.newlinesCharacterSet)
+    }
+
+    func indent(_ indent: Int = 4, with: String = " ", indentFirstLine: Bool = false, keepEmptyLines: Bool = false) -> String {
+        var n = 0
+        var indented: [String] = []
+        let indentation = Array(repeating: with, count: indent).joined()
+
+        lines().forEach { line in
+            if keepEmptyLines || line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
+                indented.append((indentFirstLine == false && n == 0 ? "" : indentation) + line)
+            }
+            n += 1
+        }
+        return indented.joined(separator: "\n")
+    }
+}
+
+public extension CharacterSet {
+    static let w = CharacterSet.whitespaces
+    static let n = CharacterSet.newlines
+    static let wn = CharacterSet.whitespacesAndNewlines
 }

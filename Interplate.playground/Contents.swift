@@ -53,3 +53,34 @@ class Template2: Template1 {
     }
 }
 print(Template2(names: names).render())
+
+struct Node {
+    let name: String
+    let children: [Node]
+}
+
+let leaf = Node(name: "Leaf", children: [])
+let second = Node(name: "SecondChild", children: [leaf, leaf, leaf])
+let first = Node(name: "FirstChild", children: [])
+let parent = Node(name: "Parent", children: [first, second])
+
+class NodesRenderer: Renderer {
+    let node: Node
+    init(node: Node) {
+        self.node = node
+    }
+    override var template: Template {
+        return """
+            node \(node.name) {
+                \(indent: 4, """
+                    \(_trim: .w)\(for: self.node.children, do: { node, loop in
+                        "\(loop.start ? "" : "\n")\(NodesRenderer(node: node).template)"
+                    })
+                """)
+            }
+            """
+    }
+}
+
+let nodes = NodesRenderer(node: parent)
+print(nodes.render())
