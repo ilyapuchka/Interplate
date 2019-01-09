@@ -18,7 +18,12 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
     }
 
     public let sourcePath: String
-    let parts: [String]
+    public let parts: [String]
+
+    init(parts: [String]) {
+        self.parts = parts
+        self.sourcePath = ""
+    }
 
     public required init(stringLiteral value: String) {
         self.parts = [value]
@@ -53,6 +58,8 @@ public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolat
         }
 
         public func appendLiteral(_ literal: String) {
+            guard literal.isEmpty == false else { return }
+
             if let trim = trim {
                 if trim.direction.contains(.before), parts.count > 0 {
                     let lastPart = parts.removeLast()

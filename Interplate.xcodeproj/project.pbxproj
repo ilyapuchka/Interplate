@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		B5D22FB921E294EF00646E21 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D22FB821E294EF00646E21 /* Format.swift */; };
+		B5D22FBB21E29ABE00646E21 /* PartialIso.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D22FBA21E29ABE00646E21 /* PartialIso.swift */; };
 		OBJ_24 /* Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Template.swift */; };
 		OBJ_31 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_42 /* InterplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* InterplateTests.swift */; };
@@ -47,8 +49,10 @@
 
 /* Begin PBXFileReference section */
 		B529EB4021DBB20300E487EB /* Interplate.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Interplate.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		B5D22FB821E294EF00646E21 /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
+		B5D22FBA21E29ABE00646E21 /* PartialIso.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartialIso.swift; sourceTree = "<group>"; };
 		"Interplate::Interplate::Product" /* Interplate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Interplate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"Interplate::InterplateTests::Product" /* InterplateTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = InterplateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"Interplate::InterplateTests::Product" /* InterplateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = InterplateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_12 /* InterplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterplateTests.swift; sourceTree = "<group>"; };
 		OBJ_13 /* XCTestManifests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCTestManifests.swift; sourceTree = "<group>"; };
 		OBJ_17 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -103,7 +107,7 @@
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				B529EB4021DBB20300E487EB /* Interplate.playground */,
@@ -114,7 +118,6 @@
 				OBJ_17 /* LICENSE */,
 				OBJ_18 /* README.md */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_7 /* Sources */ = {
@@ -129,6 +132,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* Template.swift */,
+				B5D22FB821E294EF00646E21 /* Format.swift */,
+				B5D22FBA21E29ABE00646E21 /* PartialIso.swift */,
 			);
 			name = Interplate;
 			path = Sources/Interplate;
@@ -200,7 +205,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_14 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -218,6 +223,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				B5D22FBB21E29ABE00646E21 /* PartialIso.swift in Sources */,
+				B5D22FB921E294EF00646E21 /* Format.swift in Sources */,
 				OBJ_24 /* Template.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -385,7 +392,7 @@
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = InterplateTests;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
@@ -433,7 +440,7 @@
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 4.2;
 				TARGET_NAME = InterplateTests;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				WATCHOS_DEPLOYMENT_TARGET = 2.0;
