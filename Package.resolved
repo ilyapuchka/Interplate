@@ -1,0 +1,43 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "NonEmpty",
+        "repositoryURL": "https://github.com/ilyapuchka/swift-nonempty.git",
+        "state": {
+          "branch": "master",
+          "revision": "79bd1b9603517854e3ee06e39e64304dab3a15e9",
+          "version": null
+        }
+      },
+      {
+        "package": "Prelude",
+        "repositoryURL": "https://github.com/ilyapuchka/swift-prelude.git",
+        "state": {
+          "branch": "master",
+          "revision": "9560cb9a3b175cabdd39f0bc37709ca09a91fc1a",
+          "version": null
+        }
+      },
+      {
+        "package": "SnapshotTesting",
+        "repositoryURL": "https://github.com/pointfreeco/swift-snapshot-testing.git",
+        "state": {
+          "branch": null,
+          "revision": "129e393c6d17f7f6490fa212f19ae0d558bbd5dc",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "Tagged",
+        "repositoryURL": "https://github.com/ilyapuchka/swift-tagged.git",
+        "state": {
+          "branch": "master",
+          "revision": "bff580f796f3e28d66381b4473f3cf7e93c329a2",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

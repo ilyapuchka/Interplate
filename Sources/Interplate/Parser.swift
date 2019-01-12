@@ -3,14 +3,7 @@
 //
 
 import Foundation
-
-public protocol Semigroup {
-    static func <> (lhs: Self, rhs: Self) -> Self
-}
-
-public protocol Monoid: Semigroup {
-    static var empty: Self { get }
-}
+import Prelude
 
 public struct Parser<T: Monoid, A> {
     public let parse: (T) -> (rest: T, match: A)?
@@ -40,12 +33,12 @@ extension Parser {
     }
 
     /// Processes with the left and right side StringFormatters, discarding the result of the left side.
-    public static func %> (x: Parser<T, Interplate.Unit>, y: Parser) -> Parser {
+    public static func %> (x: Parser<T, Prelude.Unit>, y: Parser) -> Parser {
         return (PartialIso.commute >>> PartialIso.unit.inverted) <¢> x <%> y
     }
 }
 
-extension Parser where A == Interplate.Unit {
+extension Parser where A == Prelude.Unit {
     /// Processes with the left and right StringFormatters, discarding the result of the right side.
     public static func <% <B>(x: Parser<T, B>, y: Parser) -> Parser<T, B> {
         return PartialIso.unit.inverted <¢> x <%> y

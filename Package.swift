@@ -8,9 +8,11 @@ let package = Package(
     products: [
         .library(name: "Interplate", targets: ["Interplate"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/ilyapuchka/swift-prelude.git", .branch("master")),
+    ],
     targets: [
-        .target(name: "Interplate", dependencies: []),
+        .target(name: "Interplate", dependencies: ["Prelude"]),
         .testTarget(name: "InterplateTests", dependencies: ["Interplate"])
     ]
 )

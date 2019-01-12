@@ -1,4 +1,5 @@
 import Foundation
+import Prelude
 
 extension Template: Monoid {
     public static let empty: Template = ""
@@ -53,9 +54,9 @@ extension StringFormatter: ExpressibleByStringInterpolation {
         } else {
             var (composed, lastType) = stringInterpolation.formatters.last!
             stringInterpolation.formatters.dropLast().reversed().forEach { (f, prevType) in
-                if lastType == Unit.self { // A <% ()
+                if lastType == Prelude.Unit.self { // A <% ()
                     (composed, lastType) = (f <% composed.map(.any), prevType)
-                } else if prevType == Unit.self { // () %> A
+                } else if prevType == Prelude.Unit.self { // () %> A
                     composed = f.map(.any) %> composed
                 } else { // A <%> B
                     (composed, lastType) = (.any <¢> f <%> composed, prevType)
@@ -116,19 +117,19 @@ extension StringFormatter {
     }
 
     /// Processes with the left and right side StringFormatters, discarding the result of the left side.
-    public static func %> (x: StringFormatter<Interplate.Unit>, y: StringFormatter) -> StringFormatter {
+    public static func %> (x: StringFormatter<Prelude.Unit>, y: StringFormatter) -> StringFormatter {
         return .init(x.parser %> y.parser)
     }
 }
 
-extension StringFormatter where A == Interplate.Unit {
+extension StringFormatter where A == Prelude.Unit {
     /// Processes with the left and right StringFormatters, discarding the result of the right side.
     public static func <% <B>(x: StringFormatter<B>, y: StringFormatter) -> StringFormatter<B> {
         return .init(x.parser <% y.parser)
     }
 }
 
-public let end: StringFormatter<Interplate.Unit> = StringFormatter<Interplate.Unit>(
+public let end: StringFormatter<Prelude.Unit> = StringFormatter<Prelude.Unit>(
     parse: { format in
         format.parts.isEmpty
             ? (Template(parts: []), unit)
@@ -138,8 +139,8 @@ public let end: StringFormatter<Interplate.Unit> = StringFormatter<Interplate.Un
     template: const(.empty)
 )
 
-public func lit(_ str: String) -> StringFormatter<Interplate.Unit> {
-    return StringFormatter<Interplate.Unit>(
+public func lit(_ str: String) -> StringFormatter<Prelude.Unit> {
+    return StringFormatter<Prelude.Unit>(
         parse: { format in
             head(format.parts).flatMap { (p, ps) in
                 return p == str

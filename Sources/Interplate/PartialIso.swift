@@ -3,107 +3,7 @@
 //
 
 import Foundation
-
-precedencegroup infixl0 {
-    associativity: left
-    higherThan: AssignmentPrecedence
-}
-precedencegroup infixr0 {
-    associativity: right
-    higherThan: infixl0
-}
-precedencegroup infixl1 {
-    associativity: left
-    higherThan: infixr0
-}
-precedencegroup infixr1 {
-    associativity: right
-    higherThan: infixl1
-}
-precedencegroup infixl2 {
-    associativity: left
-    higherThan: infixr1
-}
-precedencegroup infixr2 {
-    associativity: right
-    higherThan: infixl2
-}
-precedencegroup infixl3 {
-    associativity: left
-    higherThan: infixr2
-}
-precedencegroup infixr3 {
-    associativity: right
-    higherThan: infixl3
-}
-precedencegroup infixl4 {
-    associativity: left
-    higherThan: infixr3
-}
-precedencegroup infixr4 {
-    associativity: right
-    higherThan: infixl4
-}
-precedencegroup infixl5 {
-    associativity: left
-    higherThan: infixr4
-}
-precedencegroup infixr5 {
-    associativity: right
-    higherThan: infixl5
-    lowerThan: AdditionPrecedence
-}
-precedencegroup infixl6 {
-    associativity: left
-    higherThan: infixr5
-}
-precedencegroup infixr6 {
-    associativity: right
-    higherThan: infixl6
-    lowerThan: MultiplicationPrecedence
-}
-precedencegroup infixl7 {
-    associativity: left
-    higherThan: infixr6
-}
-precedencegroup infixr7 {
-    associativity: right
-    higherThan: infixl7
-}
-precedencegroup infixl8 {
-    associativity: left
-    higherThan: infixr7
-}
-precedencegroup infixr8 {
-    associativity: right
-    higherThan: infixl8
-}
-precedencegroup infixl9 {
-    associativity: left
-    higherThan: infixr8
-}
-precedencegroup infixr9 {
-    associativity: right
-    higherThan: infixl9
-}
-
-infix operator >=>: infixr1
-
-infix operator <|>: infixl3
-
-infix operator <¢>: infixl4
-// Apply
-infix operator <*>: infixl4
-// Apply (right-associative)
-infix operator <%>: infixr4
-infix operator %>: infixr4
-infix operator <%: infixr4
-
-infix operator <>: infixr5
-
-infix operator >>>: infixr9
-infix operator <<<: infixr9
-
+import Prelude
 
 public struct PartialIso<A, B> {
     public let apply: (A) -> B?
@@ -144,34 +44,6 @@ public struct PartialIso<A, B> {
     }
 }
 
-func flatMap <A, B, C>(_ lhs: @escaping (B) -> ((A) -> C), _ rhs: @escaping (A) -> B) -> (A) -> C {
-    return { a in
-        lhs(rhs(a))(a)
-    }
-}
-
-func >=> <A, B, C, D>(lhs: @escaping (A) -> ((D) -> B), rhs: @escaping (B) -> ((D) -> C))
-    -> (A)
-    -> ((D) -> C) {
-        return { a in
-            flatMap(rhs, lhs(a))
-        }
-}
-
-func flatMap<A, B>(_ a2b: @escaping (A) -> B?) -> (A?) -> B? {
-    return { a in
-        a.flatMap(a2b)
-    }
-}
-
-func >>> <A, B, C>(_ a2b: @escaping (A) -> B, _ b2c: @escaping (B) -> C) -> (A) -> C {
-    return { a in b2c(a2b(a)) }
-}
-
-func >=> <A, B, C>(lhs: @escaping (A) -> B?, rhs: @escaping (B) -> C?) -> (A) -> C? {
-    return lhs >>> flatMap(rhs)
-}
-
 extension PartialIso where B == A {
     /// The identity partial isomorphism.
     static var id: PartialIso {
@@ -179,11 +51,11 @@ extension PartialIso where B == A {
     }
 }
 
-extension PartialIso where B == (A, Interplate.Unit) {
+extension PartialIso where B == (A, Prelude.Unit) {
     /// An isomorphism between `A` and `(A, Unit)`.
     static var unit: PartialIso {
         return .init(
-            apply: { ($0, Interplate.unit) },
+            apply: { ($0, Prelude.unit) },
             unapply: { $0.0 }
         )
     }
@@ -225,55 +97,6 @@ public func flatten<A, B, C, D>() -> PartialIso<(A, (B, (C, D))), (A, B, C, D)> 
         apply: { ($0.0, $0.1.0, $0.1.1.0, $0.1.1.1) },
         unapply: { ($0, ($1, ($2, $3))) }
     )
-}
-
-func id<A>(_ a: A) -> A {
-    return a
-}
-
-public func const<A, B>(_ a: A) -> (B) -> A {
-    return { _ in a }
-}
-
-func curry<A, B, C>(_ function: @escaping (A, B) -> C)
-    -> (A)
-    -> (B)
-    -> C {
-        return { (a: A) -> (B) -> C in
-            { (b: B) -> C in
-                function(a, b)
-            }
-        }
-}
-
-extension Optional {
-    public static func <¢> <A>(f: (Wrapped) -> A, x: Optional) -> A? {
-        return x.map(f)
-    }
-}
-
-public func map<A, B>(_ a2b: @escaping (A) -> B) -> (A?) -> B? {
-    return { a in
-        a2b <¢> a
-    }
-}
-
-extension Optional {
-    public func apply<A>(_ f: ((Wrapped) -> A)?) -> A? {
-        // return f.flatMap(self.map) // https://bugs.swift.org/browse/SR-5422
-        guard let f = f, let a = self else { return nil }
-        return f(a)
-    }
-
-    public static func <*> <A>(f: ((Wrapped) -> A)?, x: Optional) -> A? {
-        return x.apply(f)
-    }
-}
-
-public func apply<A, B>(_ a2b: ((A) -> B)?) -> (A?) -> B? {
-    return { a in
-        a2b <*> a
-    }
 }
 
 extension Optional {
@@ -455,9 +278,6 @@ public func keys<K, V>(_ keys: [K]) -> PartialIso<[K: V], [K: V]> {
         unapply: id
     )
 }
-
-public struct Unit: Codable {}
-public let unit = Unit()
 
 func head<A>(_ xs: [A]) -> (A, [A])? {
     guard let x = xs.first else { return nil }
