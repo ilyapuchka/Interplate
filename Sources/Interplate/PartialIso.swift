@@ -458,3 +458,8 @@ public func keys<K, V>(_ keys: [K]) -> PartialIso<[K: V], [K: V]> {
 
 public struct Unit: Codable {}
 public let unit = Unit()
+
+func head<A>(_ xs: [A]) -> (A, [A])? {
+    guard let x = xs.first else { return nil }
+    return (x, Array(xs.dropFirst()))
+}

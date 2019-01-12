@@ -12,7 +12,7 @@ open class Renderer {
     }
 }
 
-public class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
     public enum Error: Swift.Error {
         case templateNotFound(String)
     }

@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		B583D28921E74D49005B60CF /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B583D28821E74D49005B60CF /* Parser.swift */; };
 		B5D22FB921E294EF00646E21 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D22FB821E294EF00646E21 /* Format.swift */; };
 		B5D22FBB21E29ABE00646E21 /* PartialIso.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D22FBA21E29ABE00646E21 /* PartialIso.swift */; };
 		OBJ_24 /* Template.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Template.swift */; };
@@ -49,6 +50,7 @@
 
 /* Begin PBXFileReference section */
 		B529EB4021DBB20300E487EB /* Interplate.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = Interplate.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		B583D28821E74D49005B60CF /* Parser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parser.swift; sourceTree = "<group>"; };
 		B5D22FB821E294EF00646E21 /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		B5D22FBA21E29ABE00646E21 /* PartialIso.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartialIso.swift; sourceTree = "<group>"; };
 		"Interplate::Interplate::Product" /* Interplate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Interplate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +135,7 @@
 			children = (
 				OBJ_9 /* Template.swift */,
 				B5D22FB821E294EF00646E21 /* Format.swift */,
+				B583D28821E74D49005B60CF /* Parser.swift */,
 				B5D22FBA21E29ABE00646E21 /* PartialIso.swift */,
 			);
 			name = Interplate;
@@ -223,6 +226,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				B583D28921E74D49005B60CF /* Parser.swift in Sources */,
 				B5D22FBB21E29ABE00646E21 /* PartialIso.swift in Sources */,
 				B5D22FB921E294EF00646E21 /* Format.swift in Sources */,
 				OBJ_24 /* Template.swift in Sources */,

@@ -23,7 +23,7 @@ var t: Template = "Hello, \(name). Year is \(year)."
 var hello = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
 hello.render((name, year))
-hello.match(format: t)
+hello.match(t)
 hello.template(for: (name, year))
 
 let templates: StringFormatter<Templates> = [
@@ -31,24 +31,35 @@ let templates: StringFormatter<Templates> = [
 ].reduce(.empty, <|>)
 
 templates.render(.hello(name: name, year: year))
-templates.match(format: t)
+templates.match(t)
 templates.template(for: .hello(name: name, year: year))
 
 hello = "Hello, \(.string). Year is \(.int)."
-hello.render((name, year))
 render(hello, name, year)
 
-t = "Hello, \(name). Year is \(year).\nHello, \(name). Year is \(year)."
-var long: StringFormatter<(String, (Int, (String, Int)))> =
-    "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <%> ".\nHello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
+t = "Hello, \(name). Year is \(year)."
+match(hello, template: t)
+render(hello, name, year)
 
-long.map(flatten()).render((name, year, name, year))
-long.match(format: t)
-
-long = "Hello, \(.string). Year is \(.int).\nHello, \(.string). Year is \(.int)."
-long.map(flatten()).render((name, year, name, year))
-long.match(format: t)
+t = """
+    Hello, \(name). Year is \(year).
+    Hello, \(name). Year is \(year).
+    """
+var long = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <%> ".\nHello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
 render(long, name, year, name, year)
-let f: StringFormatter<Any> = "Hello, \(.string). Year is \(.int).\nHello, \(.string). Year is \(.int)."
-print(f.render((name, (year, (name, year)))))
+match(long, template: t)
+
+long = """
+    Hello, \(.string). Year is \(.int).
+    Hello, \(.string). Year is \(.int).
+    """
+render(long, name, year, name, year)
+match(long, template: t)
+
+render(long, name, year, name, year)
+let f: StringFormatter<Any> = """
+    Hello, \(.string). Year is \(.int).
+    Hello, \(.string). Year is \(.int).
+    """
+f.render((name, (year, (name, year))))
