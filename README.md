@@ -1,11 +1,13 @@
 # Interplate
-Templates based on Swift 5 string interpolation.
+Templates and type-safe string formatting based on Swift 5 string interpolation.
 
 ## Requirements
 
 - Swift 5 toolchain
 
 ## About
+
+### Templates
 
 Swift string interpolation already allows to use plain strings for the purpose of templates, i.e. you can not just inject value in a string, but use it with conditional and  functional operators like `?:` and `map`, which allows to express more complex cases common for templates:
 
@@ -26,11 +28,58 @@ Swift 5 string interpolation improvements allow to extend strings with a DSL sui
 This package supports following features:
 
 - default value for optional variable `\(_: String?, default: String)`
-- `for` loops `\(for: [T], where: (T) -> Bool, do: (T, LoopContext) -> Void, empty: @autoclosure () -> Template)`
+- `for` loops `\(for: [T], where: (T) -> Bool, do: (T, LoopContext) -> Void, empty: @autoclosure () -> Template, join: (LoopContext) -> Template, keepEmptyLines: Bool)`
 - embedding other templates `\(_: Template)` or `\(include: String, notFound: @autoclosure () -> Template)`
-- indentation `\(indent: Int, with: String, indentFirstLine: Bool, _: @autoclosure () -> Template)`
-- trimming whitespaces or new lines `\(trim: CharacterSet)`
-- templates inheritance based on Swift classes inheritance
+- indentation `\(indent: Int, with: String, indentFirstLine: Bool, keepEmptyLines: Bool, _: @autoclosure () -> Template)`
+- trimming whitespaces or new lines `\(trim: CharacterSet, _: TrimDirection)`, `\(_trim: CharacterSet)`, `\(trim_: CharacterSet)`, `(_trim_: CharacterSet)`
+- templates inheritance based on Swift class inheritance
+
+### String formatting
+
+Another application of string interpolation allows to implement type-safe (almost) string format API that will ensure that wrong type of parameter passed in to build the final string. implementation of this API is heavily based on [ApplicativeRouter](https://github.com/pointfreeco/swift-web/tree/master/Sources/ApplicativeRouter) by [Point-Free](https://www.pointfree.co). 
+
+One way of using it is using operators: 
+
+```swift
+let hello = "Hello, " %> param(.string)
+render(hello, "playground")
+```
+
+This will create a `StringFormatter<String>`, string formatter that will accept single `String` argument. Note that type of formatter can be dropped here - it will be inferred from type of parameter passed to `param` function.
+
+Alternativy you can use string interpolation:
+
+```swift
+let hello: StringFormatter<String> = "Hello, \(.string)"
+render(hello, "playground")
+```
+
+This will create the same type of formatter, but type declaration is required here. This kind of formatter will not be type-safe in the same way as the first one. If the wrong type is used, i.e. if it is defined as `StringFormatter<Int>` instead, the code will compile but it will raise a runtime exception when rendering.
+
+```swift
+let hello: StringFormatter<Int> = "Hello, \(.string)"
+render(hello, 0) // Could not cast value of type 'Swift.Int' to 'Swift.String'
+```
+
+### Using `Template` and `StringFormatter` together
+
+`Template` and `StringFormatter` can work together in an interesting way. If you have both a emplate and a formatter for the same string you can use the formatter to extract values from the template to find out values used to render it.
+
+```swift
+let name = "world"
+let format: StringFormatter<Int> = "Hello, \(.string)."
+let template: Template = "Hello, \(name)."
+
+let name = format.match(template)
+//name = "world"
+```
+
+This is similar to matching regular expressions, but in a type-safe way. Formatter can also output a template-like string:
+ 
+ ```swift
+format.template(for: name)
+//Hello, \(String).
+```
 
 ## Usage
 
@@ -55,6 +104,16 @@ class HelloWorld: Renderer {
 
 let content = HelloWorld(names: ["Foo", "Bar"]).render()
 //Hello Foo, Bar!
+```
+
+To create a string format you define a value of type `StringFormatter`.  If format uses two arguments, `A` and `B`, then formatter will expect a single argument of type `(A, B)`. In case of three arguments in the format, `A`, `B` and `C`, the type of the argument will be `(A, (B, C))` and so on. So as you can see types of individual arguments are grouped in pairs alligned to the right side. When rendering this format into string you can pass all parameters in an arguments list using `render` free function:
+
+```swift
+let format: StringFormat<(String, (Int, (String, Int)))> = 
+    "Hello, \(.string). Today is \(.int) of \(.string) \(.int)"
+    
+let result = render(format, "world", 14, "Jan", 2019) 
+//Hello, world. Today is 14 of Jan 2019
 ```
 
 ## Running tests
