@@ -63,7 +63,7 @@ render(hello, 0) // Could not cast value of type 'Swift.Int' to 'Swift.String'
 
 ### Using `Template` and `StringFormatter` together
 
-`Template` and `StringFormatter` can work together in an interesting way. If you have both a emplate and a formatter for the same string you can use the formatter to extract values from the template to find out values used to render it.
+`Template` and `StringFormatter` can work together in an interesting way. If you have both a template and a formatter for the same string you can use the formatter to extract values from the template to find out values used to render it.
 
 ```swift
 let name = "world"
