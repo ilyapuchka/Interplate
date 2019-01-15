@@ -58,12 +58,15 @@ public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInte
         }
 
         public func appendLiteral(_ literal: String) {
-            guard literal.isEmpty == false else { return }
+            func append(_ literal: String) {
+                guard literal.isEmpty == false else { return }
+                self.parts.append(literal)
+            }
 
             if let trim = trim {
                 if trim.direction.contains(.before), parts.count > 0 {
                     let lastPart = parts.removeLast()
-                    self.parts.append(
+                    append(
                         String(lastPart.reversed().drop {
                             CharacterSet(charactersIn: String($0)).isSubset(of: trim.characters)
                             }.reversed()
@@ -71,17 +74,17 @@ public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInte
                     )
                 }
                 if trim.direction.contains(.after) {
-                    self.parts.append(
+                    append(
                         String(literal.drop {
                             CharacterSet(charactersIn: String($0)).isSubset(of: trim.characters)
                         })
                     )
                 } else {
-                    self.parts.append(literal)
+                    append(literal)
                 }
                 self.trim = nil
             } else {
-                self.parts.append(literal)
+                append(literal)
             }
         }
 
