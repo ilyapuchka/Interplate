@@ -164,10 +164,14 @@ public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
             return (Template(parts: ps), v)
     },
         print: { a in
-            Template(parts: [f.unapply(a) ?? ""])
+            f.unapply(a).flatMap {
+                Template(parts: [$0])
+            }
     },
         template: { a in
-            Template(parts: ["\\(\(type(of: a)))"])
+            f.unapply(a).flatMap { _ in
+                Template(parts: ["\\(\(type(of: a)))"])
+            }
     })
 }
 

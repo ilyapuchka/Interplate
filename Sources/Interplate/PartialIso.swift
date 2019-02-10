@@ -137,7 +137,7 @@ extension PartialIso where B == Any {
     public static var any: PartialIso {
         return PartialIso(
             apply: { $0 },
-            unapply: { ($0 as! A) }
+            unapply: { ($0 as? A) }
         )
     }
 }
@@ -145,7 +145,7 @@ extension PartialIso where B == Any {
 extension PartialIso where A == Any {
     public static var any: PartialIso {
         return PartialIso(
-            apply: { ($0 as! B) },
+            apply: { ($0 as? B) },
             unapply: { $0 }
         )
     }
@@ -154,8 +154,8 @@ extension PartialIso where A == Any {
 extension PartialIso {
     public static var any: PartialIso {
         return PartialIso(
-            apply: { ($0 as! B) },
-            unapply: { ($0 as! A) }
+            apply: { ($0 as? B) },
+            unapply: { ($0 as? A) }
         )
     }
 }

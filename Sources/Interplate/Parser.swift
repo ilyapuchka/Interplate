@@ -23,12 +23,12 @@ extension Parser {
             print: { ab in
                 let lhsPrint = lhs.print(ab.0)
                 let rhsPrint = rhs.print(ab.1)
-                return (curry(<>) <¢> lhsPrint <*> rhsPrint) ?? lhsPrint ?? rhsPrint
+                return (curry(<>) <¢> lhsPrint <*> rhsPrint)
         },
             template: { ab in
                 let lhsPrint = lhs.template(ab.0)
                 let rhsPrint = rhs.template(ab.1)
-                return (curry(<>) <¢> lhsPrint <*> rhsPrint) ?? lhsPrint ?? rhsPrint
+                return (curry(<>) <¢> lhsPrint <*> rhsPrint)
         })
     }
 
