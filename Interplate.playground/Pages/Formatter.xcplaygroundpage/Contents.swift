@@ -7,8 +7,9 @@ let year = 2019
 
 enum Templates: Equatable {
     case hello(name: String, year: Int)
+    case long(name: String, year: Int, name: String, year: Int)
 
-    enum iso {
+    enum _iso {
         static let hello = parenthesize(PartialIso(
             apply: Templates.hello,
             unapply: {
@@ -19,9 +20,20 @@ enum Templates: Equatable {
     }
 }
 
+extension Templates: Matchable {
+    func match<A>(_ constructor: (A) -> Templates) -> A? {
+        switch self {
+        case let .hello(values as A) where self == constructor(values): return values
+        case let .long(values as A) where self == constructor(values): return values
+        default: return nil
+        }
+    }
+}
+
 var t: Template = "Hello, \(name). Year is \(year)."
 
 var hello = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
+var long = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <%> ".\nHello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
 hello.render((name, year))
 hello.render(name, year)
@@ -30,7 +42,8 @@ hello.template(for: (name, year))
 hello.template(for: name, year)
 
 let templates: Format<Templates> = [
-    Templates.iso.hello <¢> hello
+    iso(Templates.hello) <¢> hello,
+    iso(Templates.long) <¢> "Hello, \(.string). Year is \(.int).\nHello, \(.string). Year is \(.int)."
 ].reduce(.empty, <|>)
 
 templates.render(.hello(name: name, year: year))
@@ -51,7 +64,6 @@ t = """
     Hello, \(name). Year is \(year).
     Hello, \(name). Year is \(year).
     """
-var long = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <%> ".\nHello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
 long.render(parenthesize(name, year, name, year))
 long.render(name, year, name, year)
@@ -66,6 +78,9 @@ long.render(parenthesize(name, year, name, year))
 long.render(name, year, name, year)
 long.match(t).flatMap(flatten)
 long.match(t) as (String, Int, String, Int)?
+
+templates.render(.long(name: name, year: year, name: name, year: year))
+templates.match(t)
 
 let long_template = long.template(for: parenthesize(name, year, name, year+1))!
 long_template.render()

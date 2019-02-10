@@ -402,7 +402,7 @@
 			path = ".build/checkouts/swift-prelude-090df8b4/Sources/Prelude";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -414,7 +414,6 @@
 				OBJ_94 /* LICENSE */,
 				OBJ_95 /* README.md */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_61 /* Reader */ = {
@@ -708,7 +707,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_87 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
