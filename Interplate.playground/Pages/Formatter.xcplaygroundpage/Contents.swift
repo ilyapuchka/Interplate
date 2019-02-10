@@ -24,8 +24,10 @@ var t: Template = "Hello, \(name). Year is \(year)."
 var hello = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
 hello.render((name, year))
+hello.render(name, year)
 hello.match(t)
 hello.template(for: (name, year))
+hello.template(for: name, year)
 
 let templates: StringFormatter<Templates> = [
     Templates.iso.hello <¢> hello
@@ -33,14 +35,17 @@ let templates: StringFormatter<Templates> = [
 
 templates.render(.hello(name: name, year: year))
 templates.match(t)
-templates.template(for: .hello(name: name, year: year))
+templates.template(for: .hello(name: name, year: year))?.render()
+templates.render(templateFor: .hello(name: name, year: year))
 
 hello = "Hello, \(.string). Year is \(.int)."
-render(hello, name, year)
+hello.render((name, year))
+hello.render(name, year)
 
 t = "Hello, \(name). Year is \(year)."
-match(hello, template: t)
-render(hello, name, year)
+hello.match(t)
+hello.render((name, year))
+hello.render(name, year)
 
 t = """
     Hello, \(name). Year is \(year).
@@ -48,19 +53,28 @@ t = """
     """
 var long = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <%> ".\nHello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
 
-render(long, name, year, name, year)
-match(long, template: t)
+long.render(parenthesize(name, year, name, year))
+long.render(name, year, name, year)
+long.match(t).flatMap(flatten)
+long.match(t) as (String, Int, String, Int)?
 
 long = """
     Hello, \(.string). Year is \(.int).
     Hello, \(.string). Year is \(.int).
     """
-render(long, name, year, name, year)
-match(long, template: t)
+long.render(parenthesize(name, year, name, year))
+long.render(name, year, name, year)
+long.match(t).flatMap(flatten)
+long.match(t) as (String, Int, String, Int)?
 
-render(long, name, year, name, year)
+let long_template = long.template(for: parenthesize(name, year, name, year+1))!
+long_template.render()
+long.match(long_template).flatMap(flatten)
+long.match(long_template) as (String, Int, String, Int)?
+
 let f: StringFormatter<Any> = """
     Hello, \(.string). Year is \(.int).
     Hello, \(.string). Year is \(.int).
     """
-f.render((name, (year, (name, year))))
+f.render(parenthesize(name, year, name, year))
+f.match(long_template)

@@ -35,7 +35,11 @@ public struct StringFormatter<A> {
         return self.parser.print(a).flatMap { $0.render() }
     }
 
-    public func template(for a: A) -> String? {
+    public func template(for a: A) -> Template? {
+        return self.parser.print(a)
+    }
+
+    public func render(templateFor a: A) -> String? {
         return self.parser.template(a).flatMap { $0.render() }
     }
 }
@@ -167,34 +171,82 @@ public func param<A>(_ f: PartialIso<String, A>) -> StringFormatter<A> {
     })
 }
 
-public func render<A>(_ formatter: StringFormatter<A>, _ a: A) -> String {
-    return formatter.render(a)!
+extension StringFormatter {
+
+    public func render<A1, B>(_ a: A1, _ b: B) -> String? where A == (A1, B) {
+        return self.render((a, b))
+    }
+
+    public func template<A1, B>(for a: A1, _ b: B) -> Template? where A == (A1, B) {
+        return self.parser.print((a, b))
+    }
+
+    public func render<A1, B>(templateFor a: A1, _ b: B) -> String? where A == (A1, B) {
+        return self.parser.template((a, b)).flatMap { $0.render() }
+    }
+
 }
 
-public func render<A, B>(_ formatter: StringFormatter<(A, B)>, _ a: A, _ b: B) -> String {
-    return formatter.render((a, b))!
+extension StringFormatter {
+
+    public func render<A1, B, C>(_ a: A1, _ b: B, _ c: C) -> String? where A == (A1, (B, C)) {
+        return self.render(parenthesize(a, b, c))
+    }
+
+    public func render<A1, B, C>(_ a: (A1, B, C)) -> String? where A == (A1, (B, C)) {
+        return self.render(parenthesize(a.0, a.1, a.2))
+    }
+
+    public func template<A1, B, C>(for a: A1, _ b: B, _ c: C) -> Template? where A == (A1, (B, C)) {
+        return self.parser.print(parenthesize(a, b, c))
+    }
+
+    public func template<A1, B, C>(for a: (A1, B, C)) -> Template? where A == (A1, (B, C)) {
+        return self.parser.print(parenthesize(a.0, a.1, a.2))
+    }
+
+    public func render<A1, B, C>(templateFor a: A1, _ b: B, _ c: C) -> String? where A == (A1, (B, C)) {
+        return self.parser.template(parenthesize(a, b, c)).flatMap { $0.render() }
+    }
+
+    public func render<A1, B, C>(templateFor a: (A1, B, C)) -> String? where A == (A1, (B, C)) {
+        return self.parser.template(parenthesize(a.0, a.1, a.2)).flatMap { $0.render() }
+    }
+
+    public func match<A1, B, C>(_ template: Template) -> (A1, B, C)? where A == (A1, (B, C)) {
+        return match(template).flatMap(flatten)
+    }
+
 }
 
-public func render<A, B, C>(_ formatter: StringFormatter<(A, (B, C))>, _ a: A, _ b: B, _ c: C) -> String {
-    return formatter.map(flatten()).render((a, b, c))!
-}
+extension StringFormatter {
 
-public func render<A, B, C, D>(_ formatter: StringFormatter<(A, (B, (C, D)))>, _ a: A, _ b: B, _ c: C, _ d: D) -> String {
-    return formatter.map(flatten()).render((a, b, c, d))!
-}
+    public func render<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) -> String? where A == (A1, (B, (C, D))) {
+        return self.render(parenthesize(a, b, c, d))
+    }
 
-public func match<A>(_ formatter: StringFormatter<A>, template: Template) -> A? {
-    return formatter.match(template)
-}
+    public func render<A1, B, C, D>(_ a: (A1, B, C, D)) -> String? where A == (A1, (B, (C, D))) {
+        return self.render(parenthesize(a.0, a.1, a.2, a.3))
+    }
 
-public func match<A, B>(_ formatter: StringFormatter<(A, B)>, template: Template) -> (A, B)? {
-    return formatter.match(template)
-}
+    public func template<A1, B, C, D>(for a: A1, _ b: B, _ c: C, _ d: D) -> Template? where A == (A1, (B, (C, D))) {
+        return self.parser.print(parenthesize(a, b, c, d))
+    }
 
-public func match<A, B, C>(_ formatter: StringFormatter<(A, (B, C))>, template: Template) -> (A, B, C)? {
-    return formatter.match(template).flatMap(flatten().apply)
-}
+    public func template<A1, B, C, D>(for a: (A1, B, C, D)) -> Template? where A == (A1, (B, (C, D))) {
+        return self.parser.print(parenthesize(a.0, a.1, a.2, a.3))
+    }
 
-public func match<A, B, C, D>(_ formatter: StringFormatter<((A, (B, (C, D))))>, template: Template) -> (A, B, C, D)? {
-    return formatter.match(template).flatMap(flatten().apply)
+    public func render<A1, B, C, D>(templateFor a: A1, _ b: B, _ c: C, _ d: D) -> String? where A == (A1, (B, (C, D))) {
+        return self.parser.template(parenthesize(a, b, c, d)).flatMap { $0.render() }
+    }
+
+    public func render<A1, B, C, D>(templateFor a: (A1, B, C, D)) -> String? where A == (A1, (B, (C, D))) {
+        return self.parser.template(parenthesize(a.0, a.1, a.2, a.3)).flatMap { $0.render() }
+    }
+
+    public func match<A1, B, C, D>(_ template: Template) -> (A1, B, C, D)? where A == (A1, (B, (C, D))) {
+        return match(template).flatMap(flatten)
+    }
+
 }

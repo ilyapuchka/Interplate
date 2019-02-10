@@ -75,7 +75,7 @@ class NodesRenderer: Renderer {
             node \(node.name) {
                 children = \(node.children.count)
 
-                \( node.children.isEmpty
+                \(node.children.isEmpty
                     ? [""]
                     : node.children.map(print)
                 )

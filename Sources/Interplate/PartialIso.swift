@@ -61,19 +61,22 @@ extension PartialIso where B == (A, Prelude.Unit) {
     }
 }
 
-/// Converts a partial isomorphism of a flat 1-tuple to one of a right-weighted nested tuple.
-public func parenthesize<A, B>(_ f: PartialIso<A, B>) -> PartialIso<A, B> {
-    return f
-}
-
 /// Converts a partial isomorphism of a flat 2-tuple to one of a right-weighted nested tuple.
 public func parenthesize<A, B, C>(_ f: PartialIso<(A, B), C>) -> PartialIso<(A, B), C> {
     return f
 }
 
+public func parenthesize<A, B, C>(_ a: A, _ b: B, _ c: C) -> (A, (B, C)) {
+    return (a, (b, c))
+}
+
 /// Converts a partial isomorphism of a flat 3-tuple to one of a right-weighted nested tuple.
 public func parenthesize<A, B, C, D>(_ f: PartialIso<(A, B, C), D>) -> PartialIso<(A, (B, C)), D> {
     return flatten() >>> f
+}
+
+public func parenthesize<A, B, C, D>(_ a: A, _ b: B, _ c: C, _ d: D) -> (A, (B, (C, D))) {
+    return (a, (b, (c, d)))
 }
 
 /// Converts a partial isomorphism of a flat 4-tuple to one of a right-weighted nested tuple.
@@ -86,17 +89,25 @@ public func parenthesize<A, B, C, D, E>(_ f: PartialIso<(A, B, C ,D), E>) -> Par
 /// Flattens a right-weighted nested 3-tuple.
 public func flatten<A, B, C>() -> PartialIso<(A, (B, C)), (A, B, C)> {
     return .init(
-        apply: { ($0.0, $0.1.0, $0.1.1) },
-        unapply: { ($0, ($1, $2)) }
+        apply: { flatten($0) },
+        unapply: { parenthesize($0, $1, $2) }
     )
+}
+
+public func flatten<A, B, C>(_ f: (A, (B, C))) -> (A, B, C) {
+    return (f.0, f.1.0, f.1.1)
 }
 
 /// Flattens a left-weighted nested 4-tuple.
 public func flatten<A, B, C, D>() -> PartialIso<(A, (B, (C, D))), (A, B, C, D)> {
     return .init(
-        apply: { ($0.0, $0.1.0, $0.1.1.0, $0.1.1.1) },
-        unapply: { ($0, ($1, ($2, $3))) }
+        apply: { flatten($0) },
+        unapply: { parenthesize($0, $1, $2, $3) }
     )
+}
+
+public func flatten<A, B, C, D>(_ f: (A, (B, (C, D)))) -> (A, B, C, D) {
+    return (f.0, f.1.0, f.1.1.0, f.1.1.1)
 }
 
 extension Optional {
