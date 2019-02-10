@@ -45,29 +45,29 @@ let hello = "Hello, " %> param(.string)
 render(hello, "playground")
 ```
 
-This will create a `StringFormatter<String>`, string formatter that will accept single `String` argument. Note that type of formatter can be dropped here - it will be inferred from type of parameter passed to `param` function.
+This will create a `Format<String>`, string formatter that will accept single `String` argument. Note that type of formatter can be dropped here - it will be inferred from type of parameter passed to `param` function.
 
 Alternativy you can use string interpolation:
 
 ```swift
-let hello: StringFormatter<String> = "Hello, \(.string)"
+let hello: Format<String> = "Hello, \(.string)"
 render(hello, "playground")
 ```
 
-This will create the same type of formatter, but type declaration is required here. This kind of formatter will not be type-safe in the same way as the first one. If the wrong type is used, i.e. if it is defined as `StringFormatter<Int>` instead, the code will compile but it will raise a runtime exception when rendering.
+This will create the same type of formatter, but type declaration is required here. This kind of formatter will not be type-safe in the same way as the first one. If the wrong type is used, i.e. if it is defined as `Format<Int>` instead, the code will compile but it will raise a runtime exception when rendering.
 
 ```swift
-let hello: StringFormatter<Int> = "Hello, \(.string)"
+let hello: Format<Int> = "Hello, \(.string)"
 render(hello, 0) // Could not cast value of type 'Swift.Int' to 'Swift.String'
 ```
 
-### Using `Template` and `StringFormatter` together
+### Using `Template` and `Format` together
 
-`Template` and `StringFormatter` can work together in an interesting way. If you have both a template and a formatter for the same string you can use the formatter to extract values from the template to find out values used to render it.
+`Template` and `Format` can work together in an interesting way. If you have both a template and a formatter for the same string you can use the formatter to extract values from the template to find out values used to render it.
 
 ```swift
 let name = "world"
-let format: StringFormatter<Int> = "Hello, \(.string)."
+let format: Format<Int> = "Hello, \(.string)."
 let template: Template = "Hello, \(name)."
 
 let name = format.match(template)
@@ -106,7 +106,7 @@ let content = HelloWorld(names: ["Foo", "Bar"]).render()
 //Hello Foo, Bar!
 ```
 
-To create a string format you define a value of type `StringFormatter`.  If format uses two arguments, `A` and `B`, then formatter will expect a single argument of type `(A, B)`. In case of three arguments in the format, `A`, `B` and `C`, the type of the argument will be `(A, (B, C))` and so on. So as you can see types of individual arguments are grouped in pairs alligned to the right side. When rendering this format into string you can pass all parameters in an arguments list using `render` free function:
+To create a string format you define a value of type `Format`.  If format uses two arguments, `A` and `B`, then formatter will expect a single argument of type `(A, B)`. In case of three arguments in the format, `A`, `B` and `C`, the type of the argument will be `(A, (B, C))` and so on. So as you can see types of individual arguments are grouped in pairs alligned to the right side. When rendering this format into string you can pass all parameters in an arguments list using `render` free function:
 
 ```swift
 let format: StringFormat<(String, (Int, (String, Int)))> = 

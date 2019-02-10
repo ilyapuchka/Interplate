@@ -12,7 +12,7 @@ public struct Parser<T: Monoid, A> {
 }
 
 extension Parser {
-    /// Processes with the left and right side StringFormatters, and if they succeed returns the pair of their results.
+    /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
     public static func <%> <B> (lhs: Parser, rhs: Parser<T, B>) -> Parser<T, (A, B)> {
         return Parser<T, (A, B)>(
             parse: { str in
@@ -32,14 +32,14 @@ extension Parser {
         })
     }
 
-    /// Processes with the left and right side StringFormatters, discarding the result of the left side.
+    /// Processes with the left and right side Formats, discarding the result of the left side.
     public static func %> (x: Parser<T, Prelude.Unit>, y: Parser) -> Parser {
         return (PartialIso.commute >>> PartialIso.unit.inverted) <¢> x <%> y
     }
 }
 
 extension Parser where A == Prelude.Unit {
-    /// Processes with the left and right StringFormatters, discarding the result of the right side.
+    /// Processes with the left and right Formats, discarding the result of the right side.
     public static func <% <B>(x: Parser<T, B>, y: Parser) -> Parser<T, B> {
         return PartialIso.unit.inverted <¢> x <%> y
     }

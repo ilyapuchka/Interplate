@@ -11,7 +11,7 @@ extension Template: Monoid {
     }
 }
 
-public struct StringFormatter<A> {
+public struct Format<A> {
 
     public let parser: Parser<Template, A>
 
@@ -44,13 +44,13 @@ public struct StringFormatter<A> {
     }
 }
 
-extension StringFormatter: ExpressibleByStringInterpolation {
+extension Format: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
         self = lit(String(value)).map(.any)
     }
 
-    public init(stringInterpolation: StringFormatter.StringInterpolation) {
+    public init(stringInterpolation: Format.StringInterpolation) {
         if stringInterpolation.formatters.isEmpty {
             self = .empty
         } else if stringInterpolation.formatters.count == 1 {
@@ -71,12 +71,12 @@ extension StringFormatter: ExpressibleByStringInterpolation {
     }
 
     public class StringInterpolation: StringInterpolationProtocol {
-        private(set) var formatters: [(StringFormatter<Any>, Any.Type)] = []
+        private(set) var formatters: [(Format<Any>, Any.Type)] = []
 
         public required init(literalCapacity: Int, interpolationCount: Int) {
         }
 
-        public func appendFormatter<A>(_ formatter: StringFormatter<A>) {
+        public func appendFormatter<A>(_ formatter: Format<A>) {
             formatters.append((formatter.map(.any), A.self))
         }
 
@@ -95,45 +95,45 @@ extension StringFormatter: ExpressibleByStringInterpolation {
     }
 }
 
-extension StringFormatter {
+extension Format {
 
-    /// A StringFormatter that always fails and doesn't print anything.
-    public static var empty: StringFormatter {
+    /// A Format that always fails and doesn't print anything.
+    public static var empty: Format {
         return .init(.empty)
     }
 
-    public func map<B>(_ f: PartialIso<A, B>) -> StringFormatter<B> {
+    public func map<B>(_ f: PartialIso<A, B>) -> Format<B> {
         return .init(parser.map(f))
     }
 
-    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: StringFormatter) -> StringFormatter<B> {
+    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: Format) -> Format<B> {
         return .init(lhs <¢> rhs.parser)
     }
 
-    /// Processes with the left side StringFormatter, and if that fails uses the right side StringFormatter.
-    public static func <|> (lhs: StringFormatter, rhs: StringFormatter) -> StringFormatter {
+    /// Processes with the left side Format, and if that fails uses the right side Format.
+    public static func <|> (lhs: Format, rhs: Format) -> Format {
         return .init(lhs.parser <|> rhs.parser)
     }
 
-    /// Processes with the left and right side StringFormatters, and if they succeed returns the pair of their results.
-    public static func <%> <B> (lhs: StringFormatter, rhs: StringFormatter<B>) -> StringFormatter<(A, B)> {
+    /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
+    public static func <%> <B> (lhs: Format, rhs: Format<B>) -> Format<(A, B)> {
         return .init(lhs.parser <%> rhs.parser)
     }
 
-    /// Processes with the left and right side StringFormatters, discarding the result of the left side.
-    public static func %> (x: StringFormatter<Prelude.Unit>, y: StringFormatter) -> StringFormatter {
+    /// Processes with the left and right side Formats, discarding the result of the left side.
+    public static func %> (x: Format<Prelude.Unit>, y: Format) -> Format {
         return .init(x.parser %> y.parser)
     }
 }
 
-extension StringFormatter where A == Prelude.Unit {
-    /// Processes with the left and right StringFormatters, discarding the result of the right side.
-    public static func <% <B>(x: StringFormatter<B>, y: StringFormatter) -> StringFormatter<B> {
+extension Format where A == Prelude.Unit {
+    /// Processes with the left and right Formats, discarding the result of the right side.
+    public static func <% <B>(x: Format<B>, y: Format) -> Format<B> {
         return .init(x.parser <% y.parser)
     }
 }
 
-public let end: StringFormatter<Prelude.Unit> = StringFormatter<Prelude.Unit>(
+public let end: Format<Prelude.Unit> = Format<Prelude.Unit>(
     parse: { format in
         format.parts.isEmpty
             ? (Template(parts: []), unit)
@@ -143,8 +143,8 @@ public let end: StringFormatter<Prelude.Unit> = StringFormatter<Prelude.Unit>(
     template: const(.empty)
 )
 
-public func lit(_ str: String) -> StringFormatter<Prelude.Unit> {
-    return StringFormatter<Prelude.Unit>(
+public func lit(_ str: String) -> Format<Prelude.Unit> {
+    return Format<Prelude.Unit>(
         parse: { format in
             head(format.parts).flatMap { (p, ps) in
                 return p == str
@@ -157,8 +157,8 @@ public func lit(_ str: String) -> StringFormatter<Prelude.Unit> {
     )
 }
 
-public func param<A>(_ f: PartialIso<String, A>) -> StringFormatter<A> {
-    return StringFormatter<A>(
+public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
+    return Format<A>(
         parse: { format in
             guard let (p, ps) = head(format.parts), let v = f.apply(p) else { return nil }
             return (Template(parts: ps), v)
@@ -171,7 +171,7 @@ public func param<A>(_ f: PartialIso<String, A>) -> StringFormatter<A> {
     })
 }
 
-extension StringFormatter {
+extension Format {
 
     public func render<A1, B>(_ a: A1, _ b: B) -> String? where A == (A1, B) {
         return self.render((a, b))
@@ -187,7 +187,7 @@ extension StringFormatter {
 
 }
 
-extension StringFormatter {
+extension Format {
 
     public func render<A1, B, C>(_ a: A1, _ b: B, _ c: C) -> String? where A == (A1, (B, C)) {
         return self.render(parenthesize(a, b, c))
@@ -219,7 +219,7 @@ extension StringFormatter {
 
 }
 
-extension StringFormatter {
+extension Format {
 
     public func render<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) -> String? where A == (A1, (B, (C, D))) {
         return self.render(parenthesize(a, b, c, d))

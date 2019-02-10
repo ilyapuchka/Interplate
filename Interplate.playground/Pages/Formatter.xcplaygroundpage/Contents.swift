@@ -29,7 +29,7 @@ hello.match(t)
 hello.template(for: (name, year))
 hello.template(for: name, year)
 
-let templates: StringFormatter<Templates> = [
+let templates: Format<Templates> = [
     Templates.iso.hello <¢> hello
 ].reduce(.empty, <|>)
 
@@ -72,7 +72,7 @@ long_template.render()
 long.match(long_template).flatMap(flatten)
 long.match(long_template) as (String, Int, String, Int)?
 
-let f: StringFormatter<Any> = """
+let f: Format<Any> = """
     Hello, \(.string). Year is \(.int).
     Hello, \(.string). Year is \(.int).
     """
