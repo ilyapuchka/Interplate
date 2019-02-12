@@ -82,6 +82,20 @@ extension Parser {
     }
 }
 
+func reduce<T: Monoid>(parsers: [(Parser<T, Any>, Any.Type)]) -> Parser<T, Any> {
+    var (composed, lastType) = parsers.last!
+    parsers.dropLast().reversed().forEach { (f, prevType) in
+        if lastType == Prelude.Unit.self { // A <% ()
+            (composed, lastType) = (f <% composed.map(.any), prevType)
+        } else if prevType == Prelude.Unit.self { // () %> A
+            composed = f.map(.any) %> composed
+        } else { // A <%> B
+            (composed, lastType) = (.any <¢> f <%> composed, prevType)
+        }
+    }
+    return composed
+}
+
 public protocol Matchable: Equatable {
     func match<A>(_ constructor: (A) -> Self) -> A?
 }

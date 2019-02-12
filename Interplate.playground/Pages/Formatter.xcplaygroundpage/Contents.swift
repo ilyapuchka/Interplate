@@ -18,6 +18,7 @@ enum Templates: Equatable {
             }
         ))
     }
+
 }
 
 extension Templates: Matchable {
@@ -93,3 +94,24 @@ let f: Format<Any> = """
     """
 f.render(parenthesize(name, year, name, year))
 f.match(long_template)
+
+var loc: LocalizedFormat<(String, (Int, (String, Int)))> = """
+Hello, \(.string). Year is \(.int).
+Hello, \(.string). Year is \(.int).
+"""
+loc.localize(name, year, name, year)
+loc.render(templateFor: parenthesize(name, year, name, year))
+
+loc = "Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% "."
+
+loc.localize(name, year, name, year)
+loc.render(templateFor: parenthesize(name, year, name, year))
+
+
+let locAny: LocalizedFormat<Any> = """
+Hello, \(.string). Year is \(.int).
+Hello, \(.string). Year is \(.int).
+"""
+locAny.localize((name, (year, (name, year))))
+locAny.render(templateFor: (name, (year, (name, year))))
+

@@ -13,13 +13,13 @@ extension Template: Monoid {
 
 public struct Format<A> {
 
-    public let parser: Parser<Template, A>
+    let parser: Parser<Template, A>
 
-    public init(_ parser: Parser<Template, A>) {
+    init(_ parser: Parser<Template, A>) {
         self.parser = parser
     }
 
-    public init(
+    init(
         parse: @escaping (Template) -> (rest: Template, match: A)?,
         print: @escaping (A) -> Template?,
         template: @escaping (A) -> Template?
@@ -50,47 +50,32 @@ extension Format: ExpressibleByStringInterpolation {
         self = lit(String(value)).map(.any)
     }
 
-    public init(stringInterpolation: Format.StringInterpolation) {
-        if stringInterpolation.formatters.isEmpty {
-            self = .empty
-        } else if stringInterpolation.formatters.count == 1 {
-            self = stringInterpolation.formatters[0].0.map(.any)
+    public init(stringInterpolation: StringInterpolation) {
+        if stringInterpolation.parsers.isEmpty {
+            self = .init(.empty)
         } else {
-            var (composed, lastType) = stringInterpolation.formatters.last!
-            stringInterpolation.formatters.dropLast().reversed().forEach { (f, prevType) in
-                if lastType == Prelude.Unit.self { // A <% ()
-                    (composed, lastType) = (f <% composed.map(.any), prevType)
-                } else if prevType == Prelude.Unit.self { // () %> A
-                    composed = f.map(.any) %> composed
-                } else { // A <%> B
-                    (composed, lastType) = (.any <¢> f <%> composed, prevType)
-                }
-            }
-            self = composed.map(.any)
+            let parser = reduce(parsers: stringInterpolation.parsers)
+            self = .init(parser.map(.any))
         }
     }
 
     public class StringInterpolation: StringInterpolationProtocol {
-        private(set) var formatters: [(Format<Any>, Any.Type)] = []
+        private(set) var parsers: [(Parser<Template, Any>, Any.Type)] = []
 
         public required init(literalCapacity: Int, interpolationCount: Int) {
         }
 
-        public func appendFormatter<A>(_ formatter: Format<A>) {
-            formatters.append((formatter.map(.any), A.self))
+        func appendParser<A>(_ parser: Parser<Template, A>) {
+            parsers.append((parser.map(.any), A.self))
         }
 
         public func appendLiteral(_ literal: String) {
             guard literal.isEmpty == false else { return }
-            appendFormatter(lit(literal))
-        }
-
-        public func appendInterpolation(_ literal: String) {
-            appendLiteral(literal)
+            appendParser(lit(literal))
         }
 
         public func appendInterpolation<A>(_ paramIso: PartialIso<String, A>) {
-            appendFormatter(param(paramIso))
+            appendParser(param(paramIso))
         }
     }
 }
@@ -133,7 +118,7 @@ extension Format where A == Prelude.Unit {
     }
 }
 
-public let end: Format<Prelude.Unit> = Format<Prelude.Unit>(
+private let end: Format<Prelude.Unit> = Format<Prelude.Unit>(
     parse: { format in
         format.parts.isEmpty
             ? (Template(parts: []), unit)
@@ -143,22 +128,26 @@ public let end: Format<Prelude.Unit> = Format<Prelude.Unit>(
     template: const(.empty)
 )
 
-public func lit(_ str: String) -> Format<Prelude.Unit> {
-    return Format<Prelude.Unit>(
+public func lit(_ str: String) -> Parser<Template, Prelude.Unit> {
+    return Parser<Template, Prelude.Unit>(
         parse: { format in
             head(format.parts).flatMap { (p, ps) in
                 return p == str
                     ? (Template(parts: ps), unit)
                     : nil
             }
-        },
+    },
         print: { _ in .init(parts: [str]) },
         template: { _ in .init(parts: [str]) }
     )
 }
 
-public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
-    return Format<A>(
+public func lit(_ str: String) -> Format<Prelude.Unit> {
+    return Format<Prelude.Unit>(lit(str))
+}
+
+public func param<A>(_ f: PartialIso<String, A>) -> Parser<Template, A> {
+    return Parser<Template, A>(
         parse: { format in
             guard let (p, ps) = head(format.parts), let v = f.apply(p) else { return nil }
             return (Template(parts: ps), v)
@@ -173,6 +162,10 @@ public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
                 Template(parts: ["\\(\(type(of: a)))"])
             }
     })
+}
+
+public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
+    return Format<A>(param(f))
 }
 
 extension Format {

@@ -42,7 +42,7 @@ One way of using it is using operators:
 
 ```swift
 let hello = "Hello, " %> param(.string)
-render(hello, "playground")
+hello.render("Swift")
 ```
 
 This will create a `Format<String>`, string formatter that will accept single `String` argument. Note that type of formatter can be dropped here - it will be inferred from type of parameter passed to `param` function.
@@ -50,16 +50,31 @@ This will create a `Format<String>`, string formatter that will accept single `S
 Alternativy you can use string interpolation:
 
 ```swift
-let hello: Format<String> = "Hello, \(.string)"
-render(hello, "playground")
+let hello: Format<String> = "Hello, \(.string)!"
+hello.render("Swift")
 ```
 
 This will create the same type of formatter, but type declaration is required here. This kind of formatter will not be type-safe in the same way as the first one. If the wrong type is used, i.e. if it is defined as `Format<Int>` instead, the code will compile but it will raise a runtime exception when rendering.
 
 ```swift
-let hello: Format<Int> = "Hello, \(.string)"
-render(hello, 0) // Could not cast value of type 'Swift.Int' to 'Swift.String'
+let hello: Format<Int> = "Hello, \(.string)!"
+hello.render(0) // runtime error: Could not cast value of type 'Swift.Int' to 'Swift.String'
 ```
+
+### LocalizedFormat
+
+Similarly to `Format` you can use `LocalizedFormat` to create localized strings format:
+
+```swift
+let hello: Format<String> = "Hello, \(.string)!"
+hello.render(templateFor: "Swift")
+// Hello, %@!
+
+hello.localized("Swift")
+// Olá, Swift!
+```
+
+Internally it will call `Bundle.localizedString` method to get localized format string and will pass it as well as string parameter to `String(format:arguments:)` method to produce the final string.
 
 ### Using `Template` and `Format` together
 
@@ -77,7 +92,7 @@ let name = format.match(template)
 This is similar to matching regular expressions, but in a type-safe way. Formatter can also output a template-like string:
  
  ```swift
-format.template(for: name)
+format.render(templateFor: name)
 //Hello, \(String).
 ```
 
