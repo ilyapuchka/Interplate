@@ -95,19 +95,20 @@ let f: Format<Any> = """
 f.render(parenthesize(name, year, name, year))
 f.match(long_template)
 
-var loc: LocalizedFormat<(String, (Int, (String, Int)))> = """
+var loc = "Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% "."
+
+loc.render(name, year, name, year)
+loc.render(templateFor: parenthesize(name, year, name, year))
+
+
+loc = """
 Hello, \(.string). Year is \(.int).
 Hello, \(.string). Year is \(.int).
 """
-loc.localize(name, year, name, year)
+loc.render(name, year, name, year)
 loc.render(templateFor: parenthesize(name, year, name, year))
 
 
-
-loc = "Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% "."
-
-loc.localize(name, year, name, year)
-loc.render(templateFor: parenthesize(name, year, name, year))
 
 
 var locFormat = localized("Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% ".")

@@ -63,14 +63,14 @@ hello.render(0) // runtime error: Could not cast value of type 'Swift.Int' to 'S
 
 ### LocalizedFormat
 
-Similarly to `Format` you can use `LocalizedFormat` to create localized strings format:
+Similarly to `Format` you can use `LocalizedFormat` to create localized strings formats:
 
 ```swift
 let hello: LocalizedFormat<String> = "Hello, \(.string)!"
 hello.render(templateFor: "Swift")
 // Hello, %@!
 
-hello.localize("Swift")
+hello.render("Swift")
 // Olá, Swift!
 ```
 
@@ -86,6 +86,15 @@ hello.render("Swift")
 ```
 
 Internally it will call `Bundle.localizedString` method to get localized format string and will pass it as well as string parameter to `String(format:arguments:)` method to produce the final string.
+
+To build strongly typed localized format with operators you `lparam` and `llit` functions instead of `param` and `lit`:
+
+```swift
+let hello = "Hello, " %> lparam(.string)
+hello.render("Swift")
+// Olá, Swift!
+```
+
 
 ### Using `Template` and `Format` together
 
