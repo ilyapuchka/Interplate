@@ -82,7 +82,7 @@ Internally it will call `Bundle.localizedString` method to get localized format 
 
 ```swift
 let name = "world"
-let format: Format<Int> = "Hello, \(.string)."
+let format: Format<String> = "Hello, \(.string)."
 let template: Template = "Hello, \(name)."
 
 let name = format.match(template)
