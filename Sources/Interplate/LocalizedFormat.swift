@@ -103,7 +103,7 @@ extension LocalizedFormat: ExpressibleByStringInterpolation {
             appendParser(llit(literal))
         }
 
-        public func appendInterpolation<A: LocalizableStringInterpolatable>(_ paramIso: PartialIso<String, A>) {
+        public func appendInterpolation<A>(_ paramIso: PartialIso<String, A>) where A: LocalizableStringInterpolatable {
             appendParser(lparam(paramIso))
         }
     }
@@ -234,9 +234,32 @@ extension LocalizedFormat {
         where
         A == (A1, B),
         A1: LocalizableStringInterpolatable,
-        B: LocalizableStringInterpolatable {
-            return render((a, b), table: table, bundle: bundle, value: value)
+        B: LocalizableStringInterpolatable
+    {
+        return render((a, b), table: table, bundle: bundle, value: value)
     }
+
+    public func template<A1, B>(_ a: A1, _ b: B) -> Template?
+        where
+        A == (A1, B),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable
+    {
+        return self.parser.print((a, b))?.template
+    }
+
+    public func render<A1, B>(templateFor a: A1, _ b: B) -> String?
+        where
+        A == (A1, B),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable
+    {
+        return self.parser.template((a, b)).flatMap { $0.render() }
+    }
+
+}
+
+extension LocalizedFormat {
 
     public func render<A1, B, C>(_ a: A1, _ b: B, _ c: C, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String?
         where
@@ -248,6 +271,30 @@ extension LocalizedFormat {
         return render(parenthesize(a, b, c), table: table, bundle: bundle, value: value)
     }
 
+    public func template<A1, B, C>(_ a: A1, _ b: B, _ c: C) -> Template?
+        where
+        A == (A1, (B, C)),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable,
+        C: LocalizableStringInterpolatable
+    {
+        return self.parser.print(parenthesize(a, b, c))?.template
+    }
+
+    public func render<A1, B, C>(templateFor a: A1, _ b: B, _ c: C) -> String?
+        where
+        A == (A1, (B, C)),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable,
+        C: LocalizableStringInterpolatable
+    {
+        return self.parser.template(parenthesize(a, b, c)).flatMap { $0.render() }
+    }
+
+}
+
+extension LocalizedFormat {
+
     public func render<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String?
         where
         A == (A1, (B, (C, D))),
@@ -257,6 +304,28 @@ extension LocalizedFormat {
         D: LocalizableStringInterpolatable
     {
         return render(parenthesize(a, b, c, d), table: table, bundle: bundle, value: value)
+    }
+
+    public func template<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) -> Template?
+        where
+        A == (A1, (B, (C, D))),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable,
+        C: LocalizableStringInterpolatable,
+        D: LocalizableStringInterpolatable
+    {
+        return self.parser.print(parenthesize(a, b, c, d))?.template
+    }
+
+    public func render<A1, B, C, D>(templateFor a: A1, _ b: B, _ c: C, _ d: D) -> String?
+        where
+        A == (A1, (B, (C, D))),
+        A1: LocalizableStringInterpolatable,
+        B: LocalizableStringInterpolatable,
+        C: LocalizableStringInterpolatable,
+        D: LocalizableStringInterpolatable
+    {
+        return self.parser.template(parenthesize(a, b, c, d)).flatMap { $0.render() }
     }
 
 }

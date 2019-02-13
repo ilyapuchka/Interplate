@@ -141,13 +141,13 @@ let content = HelloWorld(names: ["Foo", "Bar"]).render()
 //Hello Foo, Bar!
 ```
 
-To create a string format you define a value of type `Format`.  If format uses two arguments, `A` and `B`, then formatter will expect a single argument of type `(A, B)`. In case of three arguments in the format, `A`, `B` and `C`, the type of the argument will be `(A, (B, C))` and so on. So as you can see types of individual arguments are grouped in pairs alligned to the right side. When rendering this format into string you can pass all parameters in an arguments list using `render` free function:
+To create a string format you define a value of type `Format`.  If format uses two arguments, `A` and `B`, then formatter will expect a single argument of type `(A, B)`. In case of three arguments in the format, `A`, `B` and `C`, the type of the argument will be `(A, (B, C))` and so on. So as you can see types of individual arguments are grouped in pairs alligned to the right side. When rendering this format into string you can pass all parameters as an arguments list using `parenthesize` free function:
 
 ```swift
-let format: StringFormat<(String, (Int, (String, Int)))> = 
+let format: Format<(String, (Int, (String, Int)))> = 
     "Hello, \(.string). Today is \(.int) of \(.string) \(.int)"
     
-let result = render(format, "world", 14, "Jan", 2019) 
+let result = format.render(parenthesize("world", 14, "Jan", 2019)) 
 //Hello, world. Today is 14 of Jan 2019
 ```
 
