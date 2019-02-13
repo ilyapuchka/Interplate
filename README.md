@@ -66,7 +66,7 @@ hello.render(0) // runtime error: Could not cast value of type 'Swift.Int' to 'S
 Similarly to `Format` you can use `LocalizedFormat` to create localized strings format:
 
 ```swift
-let hello: Format<String> = "Hello, \(.string)!"
+let hello: LocalizedFormat<String> = "Hello, \(.string)!"
 hello.render(templateFor: "Swift")
 // Hello, %@!
 
