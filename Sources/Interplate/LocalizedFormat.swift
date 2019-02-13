@@ -1,6 +1,21 @@
 import Foundation
 import Prelude
 
+public func localized<A>(_ format: LocalizedFormat<A>, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> Format<A> {
+    return Format<A>(parse: { (template) -> (rest: Template, match: A)? in
+        guard let match = format.parser.parse(LocalizedTemplate(template: template, args: [])) else { return nil }
+        return (rest: match.rest.template, match: match.match)
+    }, print: { (a) -> Template? in
+        guard let template = format.parser.print(a) else { return nil }
+        return Template(stringLiteral: String(
+            format: bundle.localizedString(forKey: template.render(), value: value, table: table),
+            arguments: template.args
+        ))
+    }) { (a) -> Template? in
+        format.parser.template(a)?.template
+    }
+}
+
 public final class LocalizedTemplate: Monoid {
     public let template: Template
     public let args: [CVarArg]
@@ -93,8 +108,7 @@ extension LocalizedFormat: ExpressibleByStringInterpolation {
         }
 
         public func appendInterpolation<A: LocalizableStringInterpolatable>(_ paramIso: PartialIso<String, A>) {
-            let iso = paramIso.loc
-            appendParser(lparam(iso))
+            appendParser(lparam(paramIso))
         }
     }
 
@@ -121,7 +135,7 @@ extension Prelude.Unit: LocalizableStringInterpolatable {
 }
 
 extension PartialIso where A == String, B: LocalizableStringInterpolatable {
-    var loc: PartialIso {
+    public var loc: PartialIso {
         return PartialIso(
             apply: apply,
             unapply: { $0.localizableKeyFormat }
@@ -196,6 +210,7 @@ public func llit(_ str: String) -> LocalizedFormat<Prelude.Unit> {
 }
 
 public func lparam<A: LocalizableStringInterpolatable>(_ f: PartialIso<String, A>) -> Parser<LocalizedTemplate, A> {
+    let f = f.loc
     return Parser<LocalizedTemplate, A>(
         parse: { format in
             guard let (p, ps) = head(format.template.parts), let v = f.apply(p) else { return nil }
@@ -234,7 +249,7 @@ extension LocalizedFormat {
         B: LocalizableStringInterpolatable,
         C: LocalizableStringInterpolatable
     {
-        return localize((a, (b, c)), table: table, bundle: bundle, value: value)
+        return localize(parenthesize(a, b, c), table: table, bundle: bundle, value: value)
     }
 
     public func localize<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String?
@@ -245,7 +260,7 @@ extension LocalizedFormat {
         C: LocalizableStringInterpolatable,
         D: LocalizableStringInterpolatable
     {
-        return localize((a, (b, (c, d))), table: table, bundle: bundle, value: value)
+        return localize(parenthesize(a, b, c, d), table: table, bundle: bundle, value: value)
     }
 
 }

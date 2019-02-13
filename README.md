@@ -70,7 +70,18 @@ let hello: LocalizedFormat<String> = "Hello, \(.string)!"
 hello.render(templateFor: "Swift")
 // Hello, %@!
 
-hello.localized("Swift")
+hello.localize("Swift")
+// Olá, Swift!
+```
+
+or you can use `localized` function that returns just a `Format`:
+
+```swift
+let hello: Format<String> = localized("Hello, \(.string)!")
+hello.render(templateFor: "Swift")
+// Hello, %@!
+
+hello.render("Swift")
 // Olá, Swift!
 ```
 
