@@ -87,7 +87,7 @@ hello.render("Swift")
 
 Internally it will call `Bundle.localizedString` method to get localized format string and will pass it as well as string parameter to `String(format:arguments:)` method to produce the final string.
 
-To build strongly typed localized format with operators you `lparam` and `llit` functions instead of `param` and `lit`:
+To build strongly typed localized format with operators use `lparam` and `llit` functions instead of `param` and `lit`:
 
 ```swift
 let hello = "Hello, " %> lparam(.string)
