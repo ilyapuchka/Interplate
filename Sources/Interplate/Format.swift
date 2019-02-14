@@ -66,7 +66,11 @@ extension Format: ExpressibleByStringInterpolation {
         }
 
         func appendParser<A>(_ parser: Parser<Template, A>) {
-            parsers.append((parser.map(.any), A.self))
+            if let parser = parser as? Parser<Template, Any> {
+                parsers.append((parser, A.self))
+            } else {
+                parsers.append((parser.map(.any), A.self))
+            }
         }
 
         public func appendLiteral(_ literal: String) {

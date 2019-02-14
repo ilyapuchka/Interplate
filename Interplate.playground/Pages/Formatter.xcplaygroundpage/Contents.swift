@@ -132,3 +132,6 @@ Hello, \(.string). Year is \(.int).
 locAnyFormat.render((name, (year, (name, year))))
 locAnyFormat.render(templateFor: (name, (year, (name, year))))
 
+
+let anyFormat: Format<Any> = "Hello, \(.any)"
+anyFormat.render(1)

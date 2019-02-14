@@ -133,20 +133,11 @@ public func req<A, B>(_ f: PartialIso<A, B>) -> PartialIso<A?, B> {
     return Optional.iso.some.inverted >>> f
 }
 
-extension PartialIso where B == Any {
+extension PartialIso where A == String, B == Any {
     public static var any: PartialIso {
         return PartialIso(
             apply: { $0 },
-            unapply: { ($0 as? A) }
-        )
-    }
-}
-
-extension PartialIso where A == Any {
-    public static var any: PartialIso {
-        return PartialIso(
-            apply: { ($0 as? B) },
-            unapply: { $0 }
+            unapply: { ($0 as? A) ?? String(describing: $0) }
         )
     }
 }
