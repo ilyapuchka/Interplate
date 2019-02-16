@@ -1,7 +1,7 @@
 import Foundation
 import Prelude
 
-public final class StringTemplate: Monoid {
+public final class StringTemplate: TemplateType {
     public let template: Template
     public let args: [CVarArg]
 
@@ -10,24 +10,26 @@ public final class StringTemplate: Monoid {
         self.args = args
     }
 
-    public static var empty: StringTemplate {
-        return StringTemplate(template: .empty, args: [])
-    }
+    public static let empty: StringTemplate = StringTemplate(template: .empty, args: [])
 
     public static func <> (lhs: StringTemplate, rhs: StringTemplate) -> StringTemplate {
         return StringTemplate(template: lhs.template <> rhs.template, args: lhs.args <> rhs.args)
     }
 
-    func render() -> String {
+    public var isEmpty: Bool {
+        return template.isEmpty
+    }
+
+    public func render() -> String {
         return template.render()
     }
 }
 
-public struct StringFormat<A> {
-    let parser: Parser<StringTemplate, A>
+public struct StringFormat<A>: FormatType, ExpressibleByStringInterpolation {
+    public let parser: Parser<StringTemplate, A>
     public let format: Format<A>
 
-    init(_ parser: Parser<StringTemplate, A>) {
+    public init(_ parser: Parser<StringTemplate, A>) {
         self.parser = parser
         self.format = Format<A>(parse: { (template) -> (rest: Template, match: A)? in
             guard let match = parser.parse(StringTemplate(template: template, args: [])) else { return nil }
@@ -39,42 +41,17 @@ public struct StringFormat<A> {
         }
     }
 
-    init(
-        parse: @escaping (StringTemplate) -> (rest: StringTemplate, match: A)?,
-        print: @escaping (A) -> StringTemplate?,
-        template: @escaping (A) -> StringTemplate?
-        ) {
-        self.init(Parser<StringTemplate, A>(parse: parse, print: print, template: template))
-    }
-
-    public func render(_ a: A) -> String? {
-        guard let template = parser.print(a) else { return nil }
-        return String(format: template.render(), arguments: template.args)
+    public func match(_ template: StringTemplate) -> A? {
+        return (self <% StringFormat.end).parser.parse(template)?.match
     }
 
     public func localized(_ a: A, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String? {
-        print("localizing")
         guard let template = parser.print(a) else { return nil }
         return String(
             format: bundle.localizedString(forKey: template.render(), value: value, table: table),
             arguments: template.args
         )
     }
-
-    public func match(_ template: StringTemplate) -> A? {
-        return (self <% end).parser.parse(template)?.match
-    }
-
-    public func template(for a: A) -> StringTemplate? {
-        return self.parser.print(a)
-    }
-
-    public func render(templateFor a: A) -> String? {
-        return self.parser.template(a).flatMap { $0.render() }
-    }
-}
-
-extension StringFormat: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
         self.init(slit(String(value)).map(.any))
@@ -112,6 +89,58 @@ extension StringFormat: ExpressibleByStringInterpolation {
         }
     }
 
+}
+
+extension StringFormat {
+
+    /// A Format that always fails and doesn't print anything.
+    public static var empty: StringFormat {
+        return .init(.empty)
+    }
+
+    public func map<B>(_ f: PartialIso<A, B>) -> StringFormat<B> {
+        return .init(parser.map(f))
+    }
+
+    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: StringFormat) -> StringFormat<B> {
+        return .init(lhs <¢> rhs.parser)
+    }
+
+    /// Processes with the left side Format, and if that fails uses the right side Format.
+    public static func <|> (lhs: StringFormat, rhs: StringFormat) -> StringFormat {
+        return .init(lhs.parser <|> rhs.parser)
+    }
+
+    /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
+    public static func <%> <B> (lhs: StringFormat, rhs: StringFormat<B>) -> StringFormat<(A, B)> {
+        return .init(lhs.parser <%> rhs.parser)
+    }
+
+    /// Processes with the left and right side Formats, discarding the result of the left side.
+    public static func %> (x: StringFormat<Prelude.Unit>, y: StringFormat) -> StringFormat {
+        return .init(x.parser %> y.parser)
+    }
+}
+
+extension StringFormat where A == Prelude.Unit {
+    /// Processes with the left and right Formats, discarding the result of the right side.
+    public static func <% <B>(x: StringFormat<B>, y: StringFormat) -> StringFormat<B> {
+        return .init(x.parser <% y.parser)
+    }
+}
+
+extension StringFormat {
+    public static var end: StringFormat<Prelude.Unit> {
+        return StringFormat<Prelude.Unit>(
+            parse: { format in
+                format.isEmpty
+                    ? (.empty, unit)
+                    : nil
+        },
+            print: const(.empty),
+            template: const(.empty)
+        )
+    }
 }
 
 public protocol StringFormatting {
@@ -188,54 +217,6 @@ extension PartialIso where A == String, B: StringFormatting {
         )
     }
 }
-
-extension StringFormat {
-
-    /// A Format that always fails and doesn't print anything.
-    public static var empty: StringFormat {
-        return .init(.empty)
-    }
-
-    public func map<B>(_ f: PartialIso<A, B>) -> StringFormat<B> {
-        return .init(parser.map(f))
-    }
-
-    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: StringFormat) -> StringFormat<B> {
-        return .init(lhs <¢> rhs.parser)
-    }
-
-    /// Processes with the left side Format, and if that fails uses the right side Format.
-    public static func <|> (lhs: StringFormat, rhs: StringFormat) -> StringFormat {
-        return .init(lhs.parser <|> rhs.parser)
-    }
-
-    /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
-    public static func <%> <B> (lhs: StringFormat, rhs: StringFormat<B>) -> StringFormat<(A, B)> {
-        return .init(lhs.parser <%> rhs.parser)
-    }
-
-    /// Processes with the left and right side Formats, discarding the result of the left side.
-    public static func %> (x: StringFormat<Prelude.Unit>, y: StringFormat) -> StringFormat {
-        return .init(x.parser %> y.parser)
-    }
-}
-
-extension StringFormat where A == Prelude.Unit {
-    /// Processes with the left and right Formats, discarding the result of the right side.
-    public static func <% <B>(x: StringFormat<B>, y: StringFormat) -> StringFormat<B> {
-        return .init(x.parser <% y.parser)
-    }
-}
-
-private let end = StringFormat<Prelude.Unit>(
-    parse: { format in
-        format.template.parts.isEmpty
-            ? (StringTemplate(template: Template(parts: []), args: []), unit)
-            : nil
-},
-    print: const(.empty),
-    template: const(.empty)
-)
 
 public func slit(_ str: String) -> Parser<StringTemplate, Prelude.Unit> {
     return Parser<StringTemplate, Prelude.Unit>(

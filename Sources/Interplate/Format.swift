@@ -1,7 +1,42 @@
 import Foundation
 import Prelude
 
-extension Template: Monoid {
+public protocol TemplateType: Monoid {
+    var isEmpty: Bool { get }
+    func render() -> String
+}
+
+public protocol FormatType {
+    associatedtype T: TemplateType
+    associatedtype A
+
+    var parser: Parser<T, A> { get }
+    init(_ parser: Parser<T, A>)
+}
+
+extension FormatType {
+    init(
+        parse: @escaping (T) -> (rest: T, match: A)?,
+        print: @escaping (A) -> T?,
+        template: @escaping (A) -> T?
+    ) {
+        self.init(Parser<T, A>(parse: parse, print: print, template: template))
+    }
+
+    public func render(_ a: A) -> String? {
+        return self.parser.print(a).flatMap { $0.render() }
+    }
+
+    public func render(templateFor a: A) -> String? {
+        return self.parser.template(a).flatMap { $0.render() }
+    }
+
+    public func template(for a: A) -> T? {
+        return self.parser.print(a)
+    }
+}
+
+extension Template: TemplateType {
     public static let empty: Template = ""
 
     public static func <>(lhs: Template, rhs: Template) -> Template {
@@ -9,53 +44,33 @@ extension Template: Monoid {
             parts: lhs.parts + rhs.parts
         )
     }
+
+    public var isEmpty: Bool {
+        return parts.isEmpty
+    }
 }
 
-public struct Format<A> {
+public struct Format<A>: FormatType, ExpressibleByStringInterpolation {
+    public let parser: Parser<Template, A>
 
-    let parser: Parser<Template, A>
-
-    init(_ parser: Parser<Template, A>) {
+    public init(_ parser: Parser<Template, A>) {
         self.parser = parser
     }
 
-    init(
-        parse: @escaping (Template) -> (rest: Template, match: A)?,
-        print: @escaping (A) -> Template?,
-        template: @escaping (A) -> Template?
-    ) {
-        self.init(Parser<Template, A>(parse: parse, print: print, template: template))
-    }
-
     public func match(_ template: Template) -> A? {
-        return (self <% end).parser.parse(template)?.match
+        return (self <% Format.end).parser.parse(template)?.match
     }
-
-    public func render(_ a: A) -> String? {
-        return self.parser.print(a).flatMap { $0.render() }
-    }
-
-    public func template(for a: A) -> Template? {
-        return self.parser.print(a)
-    }
-
-    public func render(templateFor a: A) -> String? {
-        return self.parser.template(a).flatMap { $0.render() }
-    }
-}
-
-extension Format: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
-        self = lit(String(value)).map(.any)
+        self.init(lit(String(value)).map(.any))
     }
 
     public init(stringInterpolation: StringInterpolation) {
         if stringInterpolation.parsers.isEmpty {
-            self = .init(.empty)
+            self.init(.empty)
         } else {
             let parser = reduce(parsers: stringInterpolation.parsers)
-            self = .init(parser.map(.any))
+            self.init(parser.map(.any))
         }
     }
 
@@ -122,15 +137,19 @@ extension Format where A == Prelude.Unit {
     }
 }
 
-private let end: Format<Prelude.Unit> = Format<Prelude.Unit>(
-    parse: { format in
-        format.parts.isEmpty
-            ? (Template(parts: []), unit)
-            : nil
-    },
-    print: const(.empty),
-    template: const(.empty)
-)
+extension Format {
+    public static var end: Format<Prelude.Unit> {
+        return Format<Prelude.Unit>(
+            parse: { format in
+                format.isEmpty
+                    ? (.empty, unit)
+                    : nil
+        },
+            print: const(.empty),
+            template: const(.empty)
+        )
+    }
+}
 
 public func lit(_ str: String) -> Parser<Template, Prelude.Unit> {
     return Parser<Template, Prelude.Unit>(
