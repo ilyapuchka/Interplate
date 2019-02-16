@@ -21,7 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		B5B5DCAA2210A4250023F34F /* LocalizedFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D1186B22108A1B000B2970 /* LocalizedFormat.swift */; };
+		B5B5DCAA2210A4250023F34F /* StringFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D1186B22108A1B000B2970 /* StringFormat.swift */; };
 		OBJ_101 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Format.swift */; };
 		OBJ_102 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Parser.swift */; };
 		OBJ_103 /* PartialIso.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* PartialIso.swift */; };
@@ -168,7 +168,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B5D1186B22108A1B000B2970 /* LocalizedFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizedFormat.swift; sourceTree = "<group>"; };
+		B5D1186B22108A1B000B2970 /* StringFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringFormat.swift; sourceTree = "<group>"; };
 		"Interplate::Interplate::Product" /* Interplate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Interplate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Interplate::InterplateTests::Product" /* InterplateTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = InterplateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"NonEmpty::NonEmpty::Product" /* NonEmpty.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NonEmpty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -525,7 +525,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* Format.swift */,
-				B5D1186B22108A1B000B2970 /* LocalizedFormat.swift */,
+				B5D1186B22108A1B000B2970 /* StringFormat.swift */,
 				OBJ_10 /* Parser.swift */,
 				OBJ_11 /* PartialIso.swift */,
 				OBJ_12 /* Template.swift */,
@@ -735,7 +735,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_101 /* Format.swift in Sources */,
-				B5B5DCAA2210A4250023F34F /* LocalizedFormat.swift in Sources */,
+				B5B5DCAA2210A4250023F34F /* StringFormat.swift in Sources */,
 				OBJ_102 /* Parser.swift in Sources */,
 				OBJ_103 /* PartialIso.swift in Sources */,
 				OBJ_104 /* Template.swift in Sources */,

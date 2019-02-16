@@ -61,37 +61,29 @@ let hello: Format<Int> = "Hello, \(.string)!"
 hello.render(0) // runtime error: Could not cast value of type 'Swift.Int' to 'Swift.String'
 ```
 
-### LocalizedFormat
+### StringFormat
 
-Similarly to `Format` you can use `LocalizedFormat` to create localized strings formats:
+Similarly to `Format` you can use `StringFormat` to create C-style strings formats, that can be then localized:
 
 ```swift
-let hello: LocalizedFormat<String> = "Hello, \(.string)!"
+let hello: StringFormat<String> = "Hello, \(.string)!"
 hello.render(templateFor: "Swift")
 // Hello, %@!
 
-hello.render("Swift")
+hello.localized("Swift")
 // Olá, Swift!
 ```
 
-or you can use `localized` function that returns just a `Format`:
+Internally `localized` function will call `Bundle.localizedString` method to get localized format string and will pass it as well as string parameter to `String(format:arguments:)` method to produce the final string.
+
+To build strongly typed string formats with operators use `sparam` and `slit` functions instead of `param` and `lit`:
 
 ```swift
-let hello: Format<String> = localized("Hello, \(.string)!")
+let hello = "Hello, " %> sparam(.string)
 hello.render(templateFor: "Swift")
 // Hello, %@!
 
-hello.render("Swift")
-// Olá, Swift!
-```
-
-Internally it will call `Bundle.localizedString` method to get localized format string and will pass it as well as string parameter to `String(format:arguments:)` method to produce the final string.
-
-To build strongly typed localized format with operators use `lparam` and `llit` functions instead of `param` and `lit`:
-
-```swift
-let hello = "Hello, " %> lparam(.string)
-hello.render("Swift")
+hello.localized("Swift")
 // Olá, Swift!
 ```
 

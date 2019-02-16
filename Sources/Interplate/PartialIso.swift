@@ -182,6 +182,16 @@ extension PartialIso where A == String, B == String {
     }
 }
 
+extension PartialIso where A == String, B == Character {
+    /// The identity isomorphism between strings.
+    public static var char: PartialIso {
+        return PartialIso(
+            apply: Character.init,
+            unapply: String.init
+        )
+    }
+}
+
 extension PartialIso where A == String, B == Double {
     /// An isomorphism between strings and doubles.
     public static var double: PartialIso {

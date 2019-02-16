@@ -65,7 +65,7 @@ extension Format: ExpressibleByStringInterpolation {
         public required init(literalCapacity: Int, interpolationCount: Int) {
         }
 
-        func appendParser<A>(_ parser: Parser<Template, A>) {
+        public func appendParser<A>(_ parser: Parser<Template, A>) {
             if let parser = parser as? Parser<Template, Any> {
                 parsers.append((parser, A.self))
             } else {

@@ -1,5 +1,5 @@
 import Foundation
-import Interplate
+@testable import Interplate
 import Prelude
 
 let name = "playground"
@@ -8,17 +8,6 @@ let year = 2019
 enum Templates: Equatable {
     case hello(name: String, year: Int)
     case long(name: String, year: Int, name: String, year: Int)
-
-    enum _iso {
-        static let hello = parenthesize(PartialIso(
-            apply: Templates.hello,
-            unapply: {
-                guard case let .hello(result) = $0 else { return nil }
-                return result
-            }
-        ))
-    }
-
 }
 
 extension Templates: Matchable {
@@ -49,7 +38,7 @@ let templates: Format<Templates> = [
 
 templates.render(.hello(name: name, year: year))
 templates.match(t)
-templates.template(for: .hello(name: name, year: year))?.render()
+templates.match(templates.template(for: .hello(name: name, year: year))!)
 templates.render(templateFor: .hello(name: name, year: year))
 
 hello = "Hello, \(.string). Year is \(.int)."
@@ -84,6 +73,7 @@ templates.render(.long(name: name, year: year, name: name, year: year))
 templates.match(t)
 
 let long_template = long.template(for: parenthesize(name, year, name, year+1))!
+long_template.parts
 long_template.render()
 long.match(long_template).flatMap(flatten)
 long.match(long_template) as (String, Int, String, Int)?
@@ -95,7 +85,7 @@ let f: Format<Any> = """
 f.render(parenthesize(name, year, name, year))
 f.match(long_template)
 
-var loc = "Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% "."
+var loc = "Hello, " %> sparam(.string) <%> ". Year is " %> sparam(.int) <%> ".\nHello, " %> sparam(.string) <%> ". Year is " %> sparam(.int) <% "."
 
 loc.render(parenthesize(name, year, name, year))
 loc.render(templateFor: parenthesize(name, year, name, year))
@@ -107,31 +97,36 @@ Hello, \(.string). Year is \(.int).
 """
 loc.render(parenthesize(name, year, name, year))
 loc.render(templateFor: parenthesize(name, year, name, year))
+let locT = loc.template(for: parenthesize(name, year, name, year))!
+locT.template.parts
+loc.match(locT)
 
 
+var locFormat = "Hello, " %> sparam(.string) <%> ". Year is " %> sparam(.int) <%> ".\nHello, " %> sparam(.string) <%> ". Year is " %> sparam(.int) <% "."
+locFormat.format.render(parenthesize(name, year, name, year))
+locFormat.format.render(templateFor: parenthesize(name, year, name, year))
 
 
-var locFormat = localized("Hello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <%> ".\nHello, " %> lparam(.string) <%> ". Year is " %> lparam(.int) <% ".")
-locFormat.render(parenthesize(name, year, name, year))
-locFormat.render(templateFor: parenthesize(name, year, name, year))
-
-
-locFormat = localized("""
+locFormat = """
     Hello, \(.string). Year is \(.int).
     Hello, \(.string). Year is \(.int).
-    """)
-locFormat.render(parenthesize(name, year, name, year))
-locFormat.render(templateFor: parenthesize(name, year, name, year))
+    """
+locFormat.format.render(parenthesize(name, year, name, year))
+locFormat.format.render(templateFor: parenthesize(name, year, name, year))
 
 
+let locAnyFormat: StringFormat<Any> = """
+Hello, \(.string, index: 1). Year is \(.int, index: 2).
+Hello, \(.string, index: 3). Year is \(.int, index: 4).
+"""
 
-let locAnyFormat: Format<Any> = localized("""
-Hello, \(.string). Year is \(.int).
-Hello, \(.string). Year is \(.int).
-""")
-locAnyFormat.render((name, (year, (name, year))))
+locAnyFormat.render((name, (year, (name+name, year+1))))
 locAnyFormat.render(templateFor: (name, (year, (name, year))))
+let locAnyT = locAnyFormat.template(for: (name, (year, (name+name, year+1))))!
+locAnyT.template.parts
+locAnyFormat.match(locAnyT)
 
+locAnyFormat.localized((name, (year, (name+name, year+1))))
 
-let anyFormat: Format<Any> = "Hello, \(.any)"
-anyFormat.render(1)
+let anyFormat: StringFormat<Character> = "Hello, \(.char)"
+anyFormat.render("ü")
