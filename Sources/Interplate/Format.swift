@@ -191,6 +191,15 @@ public func param<A>(_ f: PartialIso<String, A>) -> Format<A> {
     return Format<A>(param(f))
 }
 
+public func any() -> Parser<Template, Any> {
+    let f = PartialIso<String, Any>.any
+    return param(f)
+}
+
+public func any() -> Format<Any> {
+    return Format(any())
+}
+
 extension Format {
 
     public func render<A1, B>(_ a: A1, _ b: B) -> String? where A == (A1, B) {

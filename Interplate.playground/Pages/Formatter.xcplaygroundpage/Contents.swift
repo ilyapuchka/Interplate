@@ -20,6 +20,8 @@ extension Templates: Matchable {
     }
 }
 
+("Hello, " %> any()).render("a")
+
 var t: Template = "Hello, \(name). Year is \(year)."
 
 var hello = "Hello, " %> param(.string) <%> ". Year is " %> param(.int) <% "."
