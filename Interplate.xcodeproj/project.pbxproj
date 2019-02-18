@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		B56EFB6D221890F700E44AB2 /* URLFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B56EFB6C221890F700E44AB2 /* URLFormat.swift */; };
 		B5B5DCAA2210A4250023F34F /* StringFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D1186B22108A1B000B2970 /* StringFormat.swift */; };
 		OBJ_101 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Format.swift */; };
 		OBJ_102 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Parser.swift */; };
@@ -168,6 +169,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B56EFB6C221890F700E44AB2 /* URLFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLFormat.swift; sourceTree = "<group>"; };
 		B5D1186B22108A1B000B2970 /* StringFormat.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringFormat.swift; sourceTree = "<group>"; };
 		"Interplate::Interplate::Product" /* Interplate.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Interplate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Interplate::InterplateTests::Product" /* InterplateTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = InterplateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -526,6 +528,7 @@
 			children = (
 				OBJ_9 /* Format.swift */,
 				B5D1186B22108A1B000B2970 /* StringFormat.swift */,
+				B56EFB6C221890F700E44AB2 /* URLFormat.swift */,
 				OBJ_10 /* Parser.swift */,
 				OBJ_11 /* PartialIso.swift */,
 				OBJ_12 /* Template.swift */,
@@ -734,6 +737,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
+				B56EFB6D221890F700E44AB2 /* URLFormat.swift in Sources */,
 				OBJ_101 /* Format.swift in Sources */,
 				B5B5DCAA2210A4250023F34F /* StringFormat.swift in Sources */,
 				OBJ_102 /* Parser.swift in Sources */,

@@ -3,5 +3,6 @@
     <pages>
         <page name='Templates'/>
         <page name='Formatter'/>
+        <page name='URLFormat'/>
     </pages>
 </playground>
