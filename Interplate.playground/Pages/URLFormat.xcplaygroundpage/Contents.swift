@@ -18,7 +18,7 @@ extension Routes: Matchable {
     }
 }
 
-var hello = "hello" </> path(.string) </> "year" </> path(.int)
+var hello = "hello" </> path(.string) </> "year" <?> query("year", .int)
 
 let routes: URLFormat<Routes> =
     scheme("http") </> host("www.me.com") </> [
@@ -34,5 +34,6 @@ template?.render()
 template?.scheme
 template?.host
 template?.pathComponents
+template?.queryItems
 template.flatMap(routes.match)
 
