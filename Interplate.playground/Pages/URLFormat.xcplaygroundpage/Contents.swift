@@ -26,8 +26,13 @@ let routes: URLFormat<Routes> =
         ].reduce(.empty, <|>)
 
 routes.render(.hello(name: name, year: year))
-let template = routes.template(for: .hello(name: name, year: year))!
-template.template.parts
-template.urlComponents.url
-template.render()
-routes.match(template)
+routes.render(templateFor: .hello(name: name, year: year))
+
+let template = routes.template(for: .hello(name: name, year: year))
+template?.path
+template?.render()
+template?.scheme
+template?.host
+template?.pathComponents
+template.flatMap(routes.match)
+

@@ -83,7 +83,8 @@ extension Parser {
 }
 
 func reduce<T: Monoid>(parsers: [(Parser<T, Any>, Any.Type)]) -> Parser<T, Any> {
-    var (composed, lastType) = parsers.last!
+    guard var (composed, lastType) = parsers.last else { return .empty }
+
     parsers.dropLast().reversed().forEach { (f, prevType) in
         if lastType == Prelude.Unit.self { // A <% ()
             (composed, lastType) = (f <% composed.map(.any), prevType)
