@@ -1,4 +1,5 @@
 import Foundation
+import Prelude
 
 open class Renderer {
     public init() {}
@@ -43,6 +44,20 @@ public final class Template: ExpressibleByStringLiteral {
         return parts.joined()
     }
 
+}
+
+extension Template: TemplateType {
+    public static let empty: Template = ""
+
+    public static func <>(lhs: Template, rhs: Template) -> Template {
+        return .init(
+            parts: lhs.parts + rhs.parts
+        )
+    }
+
+    public var isEmpty: Bool {
+        return parts.isEmpty
+    }
 }
 
 #if swift(>=5.0)

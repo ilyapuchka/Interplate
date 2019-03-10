@@ -4,5 +4,6 @@
         <page name='Templates'/>
         <page name='Formatter'/>
         <page name='URLFormat'/>
+        <page name='CommandLine'/>
     </pages>
 </playground>

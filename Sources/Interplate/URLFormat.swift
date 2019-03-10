@@ -121,25 +121,6 @@ infix operator <?>: infixr4
 infix operator <&>: infixr4
 
 extension URLFormat {
-
-    /// A Format that always fails and doesn't print anything.
-    public static var empty: URLFormat {
-        return .init(.empty)
-    }
-
-    public func map<B>(_ f: PartialIso<A, B>) -> URLFormat<B> {
-        return .init(parser.map(f))
-    }
-
-    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: URLFormat) -> URLFormat<B> {
-        return .init(lhs <¢> rhs.parser)
-    }
-
-    /// Processes with the left side Format, and if that fails uses the right side Format.
-    public static func <|> (lhs: URLFormat, rhs: URLFormat) -> URLFormat {
-        return .init(lhs.parser <|> rhs.parser)
-    }
-
     /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
     public static func </> <B> (lhs: URLFormat, rhs: URLFormat<B>) -> URLFormat<(A, B)> {
         return .init(lhs.parser <%> rhs.parser)
@@ -242,7 +223,8 @@ public func query<A>(_ key: String, _ f: PartialIso<String, A>) -> Parser<URLCom
             guard
                 let queryItems = format.queryItems,
                 let p = queryItems.first(where: { $0.name == key })?.value,
-                let v = f.apply(p) else { return nil }
+                let v = f.apply(p)
+                else { return nil }
             return (format, v)
     },
         print: { a in
@@ -251,8 +233,8 @@ public func query<A>(_ key: String, _ f: PartialIso<String, A>) -> Parser<URLCom
             }
     },
         template: { a in
-            return f.unapply(a).flatMap { s in
-                return URLComponents().with { $0.queryItems = [URLQueryItem(name: key, value: ":" + "\(type(of: a))")] }
+            f.unapply(a).flatMap { s in
+                URLComponents().with { $0.queryItems = [URLQueryItem(name: key, value: ":" + "\(type(of: a))")] }
             }
     })
 }

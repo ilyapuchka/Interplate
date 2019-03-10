@@ -98,25 +98,6 @@ extension StringFormat: ExpressibleByStringInterpolation {
 #endif
 
 extension StringFormat {
-
-    /// A Format that always fails and doesn't print anything.
-    public static var empty: StringFormat {
-        return .init(.empty)
-    }
-
-    public func map<B>(_ f: PartialIso<A, B>) -> StringFormat<B> {
-        return .init(parser.map(f))
-    }
-
-    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: StringFormat) -> StringFormat<B> {
-        return .init(lhs <¢> rhs.parser)
-    }
-
-    /// Processes with the left side Format, and if that fails uses the right side Format.
-    public static func <|> (lhs: StringFormat, rhs: StringFormat) -> StringFormat {
-        return .init(lhs.parser <|> rhs.parser)
-    }
-
     /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
     public static func <%> <B> (lhs: StringFormat, rhs: StringFormat<B>) -> StringFormat<(A, B)> {
         return .init(lhs.parser <%> rhs.parser)

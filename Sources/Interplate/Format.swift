@@ -15,6 +15,28 @@ public protocol FormatType {
 }
 
 extension FormatType {
+    /// A Format that always fails and doesn't print anything.
+    public static var empty: Self {
+        return .init(.empty)
+    }
+
+    /// Processes with the left side Format, and if that fails uses the right side Format.
+    public static func <|> (lhs: Self, rhs: Self) -> Self {
+        return .init(lhs.parser <|> rhs.parser)
+    }
+
+    public func map<F: FormatType, B>(_ f: PartialIso<A, B>) -> F
+        where F.A == B, F.T == T {
+            return .init(parser.map(f))
+    }
+
+    public static func <¢> <F: FormatType, B> (lhs: PartialIso<A, B>, rhs: Self) -> F
+        where F.A == B, F.T == T {
+            return .init(lhs <¢> rhs.parser)
+    }
+}
+
+extension FormatType {
     init(
         parse: @escaping (T) -> (rest: T, match: A)?,
         print: @escaping (A) -> T?,
@@ -36,21 +58,8 @@ extension FormatType {
     }
 }
 
-extension Template: TemplateType {
-    public static let empty: Template = ""
-
-    public static func <>(lhs: Template, rhs: Template) -> Template {
-        return .init(
-            parts: lhs.parts + rhs.parts
-        )
-    }
-
-    public var isEmpty: Bool {
-        return parts.isEmpty
-    }
-}
-
 public struct Format<A>: FormatType {
+
     public let parser: Parser<Template, A>
 
     public init(_ parser: Parser<Template, A>) {
@@ -106,25 +115,6 @@ extension Format: ExpressibleByStringInterpolation {
 #endif
 
 extension Format {
-
-    /// A Format that always fails and doesn't print anything.
-    public static var empty: Format {
-        return .init(.empty)
-    }
-
-    public func map<B>(_ f: PartialIso<A, B>) -> Format<B> {
-        return .init(parser.map(f))
-    }
-
-    public static func <¢> <B> (lhs: PartialIso<A, B>, rhs: Format) -> Format<B> {
-        return .init(lhs <¢> rhs.parser)
-    }
-
-    /// Processes with the left side Format, and if that fails uses the right side Format.
-    public static func <|> (lhs: Format, rhs: Format) -> Format {
-        return .init(lhs.parser <|> rhs.parser)
-    }
-
     /// Processes with the left and right side Formats, and if they succeed returns the pair of their results.
     public static func <%> <B> (lhs: Format, rhs: Format<B>) -> Format<(A, B)> {
         return .init(lhs.parser <%> rhs.parser)
