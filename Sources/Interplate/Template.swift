@@ -12,7 +12,7 @@ open class Renderer {
     }
 }
 
-public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
+public final class Template: ExpressibleByStringLiteral {
     public enum Error: Swift.Error {
         case templateNotFound(String)
     }
@@ -30,11 +30,6 @@ public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInte
         self.sourcePath = ""
     }
 
-    public required init(stringInterpolation: Template.StringInterpolation) {
-        self.parts = stringInterpolation.parts
-        self.sourcePath = ""
-    }
-
     public init?(sourcePath: String) {
         guard let data = FileManager.default.contents(atPath: sourcePath),
             let content = String(data: data, encoding: .utf8) else {
@@ -46,6 +41,16 @@ public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInte
 
     public func render() -> String {
         return parts.joined()
+    }
+
+}
+
+#if swift(>=5.0)
+extension Template: ExpressibleByStringInterpolation {
+
+    public required init(stringInterpolation: Template.StringInterpolation) {
+        self.parts = stringInterpolation.parts
+        self.sourcePath = ""
     }
 
     public class StringInterpolation: StringInterpolationProtocol {
@@ -221,7 +226,7 @@ public final class Template: ExpressibleByStringLiteral, ExpressibleByStringInte
         }
     }
 }
-
+#endif
 
 extension String {
     private static let newlinesCharacterSet = CharacterSet(charactersIn: "\u{000A}\u{000D}")

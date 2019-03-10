@@ -57,7 +57,7 @@ extension URLComponents: Monoid {
     }
 }
 
-public struct URLFormat<A>: FormatType, ExpressibleByStringInterpolation {
+public struct URLFormat<A>: FormatType {
     public let parser: Parser<URLComponents, A>
 
     public init(_ parser: Parser<URLComponents, A>) {
@@ -71,6 +71,11 @@ public struct URLFormat<A>: FormatType, ExpressibleByStringInterpolation {
     public func match(_ template: URLComponents) -> A? {
         return (self </> URLFormat.end).parser.parse(template)?.match
     }
+
+}
+
+#if swift(>=5.0)
+extension URLFormat: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
         self.init(path(String(value)).map(.any))
@@ -109,6 +114,7 @@ public struct URLFormat<A>: FormatType, ExpressibleByStringInterpolation {
         }
     }
 }
+#endif
 
 infix operator </>: infixr4
 //infix operator />: infixr4

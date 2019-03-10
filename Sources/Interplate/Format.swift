@@ -50,7 +50,7 @@ extension Template: TemplateType {
     }
 }
 
-public struct Format<A>: FormatType, ExpressibleByStringInterpolation {
+public struct Format<A>: FormatType {
     public let parser: Parser<Template, A>
 
     public init(_ parser: Parser<Template, A>) {
@@ -60,6 +60,11 @@ public struct Format<A>: FormatType, ExpressibleByStringInterpolation {
     public func match(_ template: Template) -> A? {
         return (self <% Format.end).parser.parse(template)?.match
     }
+
+}
+
+#if swift(>=5.0)
+extension Format: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
         self.init(lit(String(value)).map(.any))
@@ -98,6 +103,7 @@ public struct Format<A>: FormatType, ExpressibleByStringInterpolation {
         }
     }
 }
+#endif
 
 extension Format {
 

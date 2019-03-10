@@ -25,7 +25,7 @@ public final class StringTemplate: TemplateType {
     }
 }
 
-public struct StringFormat<A>: FormatType, ExpressibleByStringInterpolation {
+public struct StringFormat<A>: FormatType {
     public let parser: Parser<StringTemplate, A>
     public let format: Format<A>
 
@@ -52,6 +52,11 @@ public struct StringFormat<A>: FormatType, ExpressibleByStringInterpolation {
             arguments: template.args
         )
     }
+
+}
+
+#if swift(>=5.0)
+extension StringFormat: ExpressibleByStringInterpolation {
 
     public init(stringLiteral value: String) {
         self.init(slit(String(value)).map(.any))
@@ -90,6 +95,7 @@ public struct StringFormat<A>: FormatType, ExpressibleByStringInterpolation {
     }
 
 }
+#endif
 
 extension StringFormat {
 
@@ -193,7 +199,11 @@ extension CLongLong: StringFormatting {
 #if os(macOS)
 extension Float80: StringFormatting {
     static public var format: String { return "Lf" }
+    #if swift(>=5.0)
     public var arg: CVarArg { return self }
+    #else
+    public var arg: CVarArg { return Float(self) }
+    #endif
 }
 #else
 extension Double: StringFormatting {
