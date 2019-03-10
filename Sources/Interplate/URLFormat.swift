@@ -117,9 +117,8 @@ extension URLFormat: ExpressibleByStringInterpolation {
 #endif
 
 infix operator </>: infixr4
-//infix operator />: infixr4
-//infix operator </: infixr4
 infix operator <?>: infixr4
+infix operator <&>: infixr4
 
 extension URLFormat {
 
@@ -158,6 +157,14 @@ extension URLFormat {
     public static func <?> (x: URLFormat<Prelude.Unit>, y: URLFormat) -> URLFormat {
         return .init(x.parser %> y.parser)
     }
+
+    public static func <&> <B> (lhs: URLFormat, rhs: URLFormat<B>) -> URLFormat<(A, B)> {
+        return .init(lhs.parser <%> rhs.parser)
+    }
+
+    public static func <&> (x: URLFormat<Prelude.Unit>, y: URLFormat) -> URLFormat {
+        return .init(x.parser %> y.parser)
+    }
 }
 
 extension URLFormat where A == Prelude.Unit {
@@ -167,6 +174,10 @@ extension URLFormat where A == Prelude.Unit {
     }
     
     public static func <?> <B>(x: URLFormat<B>, y: URLFormat) -> URLFormat<B> {
+        return .init(x.parser <% y.parser)
+    }
+
+    public static func <&> <B>(x: URLFormat<B>, y: URLFormat) -> URLFormat<B> {
         return .init(x.parser <% y.parser)
     }
 }
