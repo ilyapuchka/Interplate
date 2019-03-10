@@ -101,6 +101,13 @@ public protocol Matchable: Equatable {
     func match<A>(_ constructor: (A) -> Self) -> A?
 }
 
+public func iso<U: Matchable>(_ f: U) -> PartialIso<Prelude.Unit, U> {
+    return PartialIso<Prelude.Unit, U>(
+        apply: { _ in f },
+        unapply: { $0.match({ _ in f }) }
+    )
+}
+
 public func iso<A, U: Matchable>(_ f: @escaping (A) -> U) -> PartialIso<A, U> {
     return PartialIso<A, U>(
         apply: f,

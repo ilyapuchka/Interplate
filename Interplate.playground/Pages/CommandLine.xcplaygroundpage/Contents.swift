@@ -50,12 +50,19 @@ let args = [
 
 enum Commands {
     case hello(name: String, year: Int?, verbose: Bool)
+    case print
 }
 
 extension Commands: Matchable {
     func match<A>(_ constructor: (A) -> Commands) -> A? {
         switch self {
         case let .hello(values as A) where self == constructor(values): return values
+        case .print:
+            if let a = Prelude.unit as? A, constructor(a) == self {
+                return a
+            } else {
+                return nil
+            }
         default: return nil
         }
     }
@@ -63,17 +70,36 @@ extension Commands: Matchable {
 
 let commands: CommandLineFormat<Commands> = [
     iso(Commands.hello)
-        <¢> command("hello")
-        <%> arg(long: "name", .string)
-        <%> arg(long: "year", opt(.int))
-        <%> option(long: "verbose")
+        <¢> command(
+            "hello",
+            desc: "greeting"
+        )
+        <%> arg(
+            long: "name", short: "n", .string,
+            desc: "a name",
+            example: "playground"
+        )
+        <%> arg(
+            long: "year", short: "y", opt(.int),
+            desc: "a year",
+            example: 2019
+        )
+        <%> option(
+            long: "verbose",
+            desc: "be verbose"
+        ),
+    iso(Commands.print)
+        <¢> command(
+            "print",
+            desc: "printing"
+        )
     ].reduce(.empty, <|>)
 
+print(commands.help())
 
 commands.match(args)
 
-//var cmd = Commands(command: .hello(name: name, year: year), verbose: true)
-//commands.render(cmd)
-//commands.match(commands.template(for: cmd)!)?.command
-//commands.render(templateFor: cmd)
-
+var cmd = Commands.hello(name: name, year: year, verbose: true)
+commands.render(cmd)
+commands.match(commands.template(for: cmd)!)
+commands.render(templateFor: cmd)
