@@ -151,7 +151,10 @@ public func command(_ str: String) -> Parser<CommandLineArguments, Prelude.Unit>
     )
 }
 
-public func command(_ str: String, desc: String) -> CommandLineFormat<Prelude.Unit> {
+public func command(
+    _ str: String,
+    desc: String
+) -> CommandLineFormat<Prelude.Unit> {
     return CommandLineFormat<Prelude.Unit>(
         parser: command(str),
         usage: const("\(str): \(desc)"),
@@ -159,7 +162,11 @@ public func command(_ str: String, desc: String) -> CommandLineFormat<Prelude.Un
     )
 }
 
-public func arg<A>(long: String, short: String?, _ f: PartialIso<String, A>) -> Parser<CommandLineArguments, A> {
+public func arg<A>(
+    long: String,
+    short: String?,
+    _ f: PartialIso<String, A>
+) -> Parser<CommandLineArguments, A> {
     return Parser<CommandLineArguments, A>(
         parse: { format in
             guard
@@ -178,7 +185,7 @@ public func arg<A>(long: String, short: String?, _ f: PartialIso<String, A>) -> 
 }
 
 public func arg<A>(
-    long: String,
+    _ long: String,
     short: String? = nil,
     _ f: PartialIso<String, A>,
     desc: String,
@@ -217,7 +224,7 @@ public func arg<A>(
 }
 
 public func arg<A>(
-    long: String,
+    _ long: String,
     short: String? = nil,
     _ f: PartialIso<String?, A?>,
     desc: String,
@@ -246,7 +253,7 @@ public func option(
 }
 
 public func option(
-    long: String,
+    _ long: String,
     short: String? = nil,
     desc: String
 ) -> CommandLineFormat<Bool> {

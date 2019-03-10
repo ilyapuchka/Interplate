@@ -75,17 +75,17 @@ let commands: CommandLineFormat<Commands> = [
             desc: "greeting"
         )
         <%> arg(
-            long: "name", short: "n", .string,
+            "name", short: "n", .string,
             desc: "a name",
             example: "playground"
         )
         <%> arg(
-            long: "year", short: "y", opt(.int),
+            "year", short: "y", opt(.int),
             desc: "a year",
             example: 2019
         )
         <%> option(
-            long: "verbose",
+            "verbose",
             desc: "be verbose"
         ),
     iso(Commands.print)
