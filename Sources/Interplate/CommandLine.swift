@@ -90,7 +90,7 @@ extension CommandLineFormat {
                     rhs.usage(example)
                     ]
                     .filter({ !$0.isEmpty })
-                    .joined(separator: "\n\n")
+                    .joined(separator: "\n")
         },
             example: lhs.example + rhs.example
         )
@@ -122,17 +122,6 @@ extension CommandLineFormat {
             parser: lhs.parser %> rhs.parser,
             usage: { lhs.usage(unit) + "\n" + rhs.usage($0) },
             example: rhs.example
-        )
-    }
-}
-
-extension CommandLineFormat where A == Prelude.Unit {
-    /// Processes with the left and right Formats, discarding the result of the right side.
-    public static func <%> <B>(lhs: CommandLineFormat<B>, rhs: CommandLineFormat) -> CommandLineFormat<B> {
-        return CommandLineFormat<B>(
-            parser: lhs.parser <% rhs.parser,
-            usage: { lhs.usage($0) + "\n" + rhs.usage(unit) },
-            example: lhs.example
         )
     }
 }
