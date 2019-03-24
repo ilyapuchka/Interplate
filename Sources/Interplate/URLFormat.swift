@@ -57,11 +57,15 @@ extension URLComponents: Monoid {
     }
 }
 
-public struct URLFormat<A>: FormatType {
+public struct URLFormat<A>: FormatType, ExpressibleByStringLiteral {
     public let parser: Parser<URLComponents, A>
 
     public init(_ parser: Parser<URLComponents, A>) {
         self.parser = parser
+    }
+
+    public init(stringLiteral value: String) {
+        self.init(path(String(value)).map(.any))
     }
 
     public func render(_ a: A) -> String? {
@@ -76,10 +80,6 @@ public struct URLFormat<A>: FormatType {
 
 #if swift(>=5.0)
 extension URLFormat: ExpressibleByStringInterpolation {
-
-    public init(stringLiteral value: String) {
-        self.init(path(String(value)).map(.any))
-    }
 
     public init(stringInterpolation: StringInterpolation) {
         if stringInterpolation.parsers.isEmpty {
