@@ -21,7 +21,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		B51CF85722355AFA00FEC269 /* CommandLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51CF85622355AFA00FEC269 /* CommandLine.swift */; };
 		OBJ_106 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* Format.swift */; };
 		OBJ_107 /* Parser.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* Parser.swift */; };
 		OBJ_108 /* PartialIso.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* PartialIso.swift */; };
@@ -173,7 +172,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		B51CF85622355AFA00FEC269 /* CommandLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLine.swift; sourceTree = "<group>"; };
 		"Interplate::Interplate::Product" /* Interplate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Interplate.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Interplate::InterplateTests::Product" /* InterplateTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = InterplateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		"NonEmpty::NonEmpty::Product" /* NonEmpty.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NonEmpty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -420,7 +418,7 @@
 			path = ".build/checkouts/swift-prelude.git--1136030163167561456/Sources/Prelude";
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -430,7 +428,6 @@
 				OBJ_20 /* Dependencies */,
 				OBJ_95 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_65 /* ValidationSemigroup */ = {
@@ -558,7 +555,6 @@
 				OBJ_12 /* StringFormat.swift */,
 				OBJ_13 /* Template.swift */,
 				OBJ_14 /* URLFormat.swift */,
-				B51CF85622355AFA00FEC269 /* CommandLine.swift */,
 			);
 			name = Interplate;
 			path = Sources/Interplate;
@@ -739,7 +735,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_95 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -768,7 +764,6 @@
 				OBJ_108 /* PartialIso.swift in Sources */,
 				OBJ_109 /* StringFormat.swift in Sources */,
 				OBJ_110 /* Template.swift in Sources */,
-				B51CF85722355AFA00FEC269 /* CommandLine.swift in Sources */,
 				OBJ_111 /* URLFormat.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
