@@ -26,7 +26,7 @@ public final class Template: ExpressibleByStringLiteral {
         self.sourcePath = ""
     }
 
-    public required init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.parts = [value]
         self.sourcePath = ""
     }
@@ -63,9 +63,8 @@ extension Template: TemplateType {
 #if swift(>=5.0)
 extension Template: ExpressibleByStringInterpolation {
 
-    public required init(stringInterpolation: Template.StringInterpolation) {
-        self.parts = stringInterpolation.parts
-        self.sourcePath = ""
+    public convenience init(stringInterpolation: Template.StringInterpolation) {
+        self.init(parts: stringInterpolation.parts)
     }
 
     public class StringInterpolation: StringInterpolationProtocol {
