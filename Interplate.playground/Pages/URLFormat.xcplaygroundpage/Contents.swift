@@ -1,6 +1,7 @@
 import Foundation
 @testable import Interplate
 import Prelude
+import CommonParsers
 
 let name = "playground"
 let year = 2019
@@ -12,8 +13,9 @@ enum Routes: Equatable {
 extension Routes: Matchable {
     func match<A>(_ constructor: (A) -> Routes) -> A? {
         switch self {
-        case let .hello(values as A) where self == constructor(values): return values
-        default: return nil
+        case let .hello(values):
+            guard let a = values as? A, self == constructor(a) else { return nil }
+            return a
         }
     }
 }
@@ -26,9 +28,10 @@ let routes: URLFormat<Routes> =
         ].reduce(.empty, <|>)
 
 routes.render(.hello(name: name, year: year))
-routes.render(templateFor: .hello(name: name, year: year))
+routes.template(for: .hello(name: name, year: year))?.render()
 
-let template = routes.template(for: .hello(name: name, year: year))
+routes.template(for: .hello(name: name, year: year))
+let template = routes.print(.hello(name: name, year: year))
 template?.path
 template?.render()
 template?.scheme

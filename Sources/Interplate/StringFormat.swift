@@ -1,4 +1,5 @@
 import Foundation
+import CommonParsers
 import Prelude
 
 public final class StringTemplate: TemplateType {
@@ -31,22 +32,30 @@ public struct StringFormat<A>: FormatType {
 
     public init(_ parser: Parser<StringTemplate, A>) {
         self.parser = parser
-        self.format = Format<A>(parse: { (template) -> (rest: Template, match: A)? in
-            guard let match = parser.parse(StringTemplate(template: template, args: [])) else { return nil }
+        self.format = Format<A>(Parser(parse: { (template) -> (rest: Template, match: A)? in
+            guard let match = try parser.parse(StringTemplate(template: template, args: [])) else { return nil }
             return (rest: match.rest.template, match: match.match)
         }, print: { (a) -> Template? in
-            parser.print(a)?.template
-        }) { (a) -> Template? in
-            parser.template(a)?.template
-        }
+            try parser.print(a)?.template
+        }, template: { (a) -> Template? in
+            try parser.template(a)?.template
+        }))
     }
 
-    public func match(_ template: StringTemplate) -> A? {
-        return (self <% StringFormat.end).parser.parse(template)?.match
+    public func match(_ template: StringTemplate) throws -> A? {
+        return try (self <% StringFormat.end).parser.parse(template)?.match
     }
 
-    public func localized(_ a: A, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String? {
-        guard let template = parser.print(a) else { return nil }
+    public func render(_ a: A) throws -> String? {
+        return try self.print(a).flatMap { $0.render() }
+    }
+
+    public func template(_ a: A) throws -> StringTemplate? {
+        return try self.print(a)
+    }
+
+    public func localized(_ a: A, table: String? = nil, bundle: Bundle = .main, value: String? = nil) throws -> String? {
+        guard let template = try parser.print(a) else { return nil }
         return String(
             format: bundle.localizedString(forKey: template.render(), value: value, table: table),
             arguments: template.args
@@ -119,13 +128,11 @@ extension StringFormat where A == Prelude.Unit {
 extension StringFormat {
     public static var end: StringFormat<Prelude.Unit> {
         return StringFormat<Prelude.Unit>(
-            parse: { format in
-                format.isEmpty
-                    ? (.empty, unit)
-                    : nil
-        },
-            print: const(.empty),
-            template: const(.empty)
+            Parser(
+                parse: { $0.isEmpty ? (.empty, unit) : nil },
+                print: const(.empty),
+                template: const(.empty)
+            )
         )
     }
 }
@@ -209,6 +216,11 @@ extension PartialIso where A == String, B: StringFormatting {
     }
 }
 
+func head<A>(_ xs: [A]) -> (A, [A])? {
+    guard let x = xs.first else { return nil }
+    return (x, Array(xs.dropFirst()))
+}
+
 public func slit(_ str: String) -> Parser<StringTemplate, Prelude.Unit> {
     return Parser<StringTemplate, Prelude.Unit>(
         parse: { format in
@@ -230,11 +242,11 @@ public func slit(_ str: String) -> StringFormat<Prelude.Unit> {
 private func _sparam<A: StringFormatting>(_ f: PartialIso<String, A>) -> Parser<StringTemplate, A> {
     return Parser<StringTemplate, A>(
         parse: { format in
-            guard let (p, ps) = head(format.template.parts), let v = f.apply(p) else { return nil }
+            guard let (p, ps) = head(format.template.parts), let v = try f.apply(p) else { return nil }
             return (StringTemplate(template: Template(parts: ps), args: [v.arg]), v)
     },
         print: { a in
-            f.unapply(a).flatMap {
+            try f.unapply(a).flatMap {
                 StringTemplate(
                     template: Template(parts: [String(format: $0, a.arg)]),
                     args: [
@@ -244,7 +256,7 @@ private func _sparam<A: StringFormatting>(_ f: PartialIso<String, A>) -> Parser<
             }
     },
         template: { a in
-            f.unapply(a).flatMap {
+            try f.unapply(a).flatMap {
                 StringTemplate(
                     template: Template(parts: [$0]),
                     args: [
@@ -273,72 +285,72 @@ public func sparam<A: StringFormatting>(_ f: PartialIso<String, A>, index: UInt)
 
 extension StringFormat {
 
-    public func render<A1, B>(_ a: A1, _ b: B) -> String? where A == (A1, B)
+    public func render<A1, B>(_ a: A1, _ b: B) throws -> String? where A == (A1, B)
     {
-        return render((a, b))
+        return try render((a, b))
     }
 
-    public func localized<A1, B>(_ a: A1, _ b: B, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String? where A == (A1, B)
+    public func localized<A1, B>(_ a: A1, _ b: B, table: String? = nil, bundle: Bundle = .main, value: String? = nil) throws -> String? where A == (A1, B)
     {
-        return localized((a, b), table: table, bundle: bundle, value: value)
+        return try localized((a, b), table: table, bundle: bundle, value: value)
     }
 
-    public func template<A1, B>(_ a: A1, _ b: B) -> Template? where A == (A1, B)
+    public func template<A1, B>(_ a: A1, _ b: B) throws -> StringTemplate? where A == (A1, B)
     {
-        return self.parser.print((a, b))?.template
+        return try self.print((a, b))
     }
 
-    public func render<A1, B>(templateFor a: A1, _ b: B) -> String? where A == (A1, B)
+    public func render<A1, B>(templateFor a: A1, _ b: B) throws -> String? where A == (A1, B)
     {
-        return self.parser.template((a, b)).flatMap { $0.render() }
-    }
-
-}
-
-extension StringFormat {
-
-    public func render<A1, B, C>(_ a: A1, _ b: B, _ c: C) -> String? where A == (A1, (B, C))
-    {
-        return render(parenthesize(a, b, c))
-    }
-
-    public func localized<A1, B, C>(_ a: A1, _ b: B, _ c: C, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String? where A == (A1, (B, C))
-    {
-        return localized(parenthesize(a, b, c), table: table, bundle: bundle, value: value)
-    }
-
-    public func template<A1, B, C>(_ a: A1, _ b: B, _ c: C) -> Template? where A == (A1, (B, C))
-    {
-        return self.parser.print(parenthesize(a, b, c))?.template
-    }
-
-    public func render<A1, B, C>(templateFor a: A1, _ b: B, _ c: C) -> String? where A == (A1, (B, C))
-    {
-        return self.parser.template(parenthesize(a, b, c)).flatMap { $0.render() }
+        return try self.parser.template((a, b)).flatMap { $0.render() }
     }
 
 }
 
 extension StringFormat {
 
-    public func render<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) -> String? where A == (A1, (B, (C, D)))
+    public func render<A1, B, C>(_ a: A1, _ b: B, _ c: C) throws -> String? where A == (A1, (B, C))
     {
-        return render(parenthesize(a, b, c, d))
+        return try render(parenthesize(a, b, c))
     }
 
-    public func localized<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D, table: String? = nil, bundle: Bundle = .main, value: String? = nil) -> String? where A == (A1, (B, (C, D)))
+    public func localized<A1, B, C>(_ a: A1, _ b: B, _ c: C, table: String? = nil, bundle: Bundle = .main, value: String? = nil) throws -> String? where A == (A1, (B, C))
     {
-        return localized(parenthesize(a, b, c, d), table: table, bundle: bundle, value: value)
+        return try localized(parenthesize(a, b, c), table: table, bundle: bundle, value: value)
     }
 
-    public func template<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) -> Template? where A == (A1, (B, (C, D)))
+    public func template<A1, B, C>(_ a: A1, _ b: B, _ c: C) throws -> StringTemplate? where A == (A1, (B, C))
     {
-        return self.parser.print(parenthesize(a, b, c, d))?.template
+        return try self.print(parenthesize(a, b, c))
     }
 
-    public func render<A1, B, C, D>(templateFor a: A1, _ b: B, _ c: C, _ d: D) -> String? where A == (A1, (B, (C, D)))
+    public func render<A1, B, C>(templateFor a: A1, _ b: B, _ c: C) throws -> String? where A == (A1, (B, C))
     {
-        return self.parser.template(parenthesize(a, b, c, d)).flatMap { $0.render() }
+        return try self.parser.template(parenthesize(a, b, c)).flatMap { $0.render() }
+    }
+
+}
+
+extension StringFormat {
+
+    public func render<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) throws -> String? where A == (A1, (B, (C, D)))
+    {
+        return try render(parenthesize(a, b, c, d))
+    }
+
+    public func localized<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D, table: String? = nil, bundle: Bundle = .main, value: String? = nil) throws -> String? where A == (A1, (B, (C, D)))
+    {
+        return try localized(parenthesize(a, b, c, d), table: table, bundle: bundle, value: value)
+    }
+
+    public func template<A1, B, C, D>(_ a: A1, _ b: B, _ c: C, _ d: D) throws -> StringTemplate? where A == (A1, (B, (C, D)))
+    {
+        return try self.print(parenthesize(a, b, c, d))
+    }
+
+    public func render<A1, B, C, D>(templateFor a: A1, _ b: B, _ c: C, _ d: D) throws -> String? where A == (A1, (B, (C, D)))
+    {
+        return try self.parser.template(parenthesize(a, b, c, d)).flatMap { $0.render() }
     }
 
 }

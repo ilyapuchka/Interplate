@@ -1,4 +1,5 @@
 import Foundation
+import CommonParsers
 import Prelude
 
 extension URLComponents: TemplateType {
@@ -68,12 +69,12 @@ public struct URLFormat<A>: FormatType, ExpressibleByStringLiteral {
         self.init(path(String(value)).map(.any))
     }
 
-    public func render(_ a: A) -> String? {
-        return self.parser.print(a).flatMap { $0.render() }
+    public func render(_ a: A) throws -> String? {
+        return try self.parser.print(a).flatMap { $0.render() }
     }
 
-    public func match(_ template: URLComponents) -> A? {
-        return (self </> URLFormat.end).parser.parse(template)?.match
+    public func match(_ template: URLComponents) throws -> A? {
+        return try (self </> URLFormat.end).parser.parse(template)?.match
     }
 
 }
@@ -166,13 +167,11 @@ extension URLFormat where A == Prelude.Unit {
 extension URLFormat {
     public static var end: URLFormat<Prelude.Unit> {
         return URLFormat<Prelude.Unit>(
-            parse: { format in
-                return format.isEmpty
-                    ? (.empty, unit)
-                    : nil
-        },
-            print: const(.empty),
-            template: const(.empty)
+            Parser(
+                parse: { $0.isEmpty ? (.empty, unit) : nil },
+                print: const(.empty),
+                template: const(.empty)
+            )
         )
     }
 }
@@ -198,16 +197,16 @@ public func path(_ str: String) -> URLFormat<Prelude.Unit> {
 public func path<A>(_ f: PartialIso<String, A>) -> Parser<URLComponents, A> {
     return Parser<URLComponents, A>(
         parse: { format in
-            guard let (p, ps) = head(format.pathComponents), let v = f.apply(p) else { return nil }
+            guard let (p, ps) = head(format.pathComponents), let v = try f.apply(p) else { return nil }
             return (format.with { $0.pathComponents = ps }, v)
     },
         print: { a in
-            f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 URLComponents().with { $0.path = s }
             }
     },
         template: { a in
-            return f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 return URLComponents().with { $0.path = ":" + "\(type(of: a))" }
             }
     })
@@ -223,17 +222,17 @@ public func query<A>(_ key: String, _ f: PartialIso<String, A>) -> Parser<URLCom
             guard
                 let queryItems = format.queryItems,
                 let p = queryItems.first(where: { $0.name == key })?.value,
-                let v = f.apply(p)
+                let v = try f.apply(p)
                 else { return nil }
             return (format, v)
     },
         print: { a in
-            f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 URLComponents().with { $0.queryItems = [URLQueryItem(name: key, value: s)] }
             }
     },
         template: { a in
-            f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 URLComponents().with { $0.queryItems = [URLQueryItem(name: key, value: ":" + "\(type(of: a))")] }
             }
     })
@@ -246,7 +245,7 @@ public func query<A>(_ key: String, _ f: PartialIso<String, A>) -> URLFormat<A> 
 public func scheme(_ str: String) -> Parser<URLComponents, Prelude.Unit> {
     return Parser<URLComponents, Prelude.Unit>(
         parse: { format in
-            return format.scheme.flatMap { (scheme) in
+            format.scheme.flatMap { (scheme) in
                 return scheme == str
                     ? (format.with { $0.scheme = nil }, unit)
                     : nil
@@ -264,7 +263,7 @@ public func scheme(_ str: String) -> URLFormat<Prelude.Unit> {
 public func host(_ str: String) -> Parser<URLComponents, Prelude.Unit> {
     return Parser<URLComponents, Prelude.Unit>(
         parse: { format in
-            return format.host.flatMap { (host) in
+            format.host.flatMap { (host) in
                 return host == str
                     ? (format.with { $0.host = nil }, unit)
                     : nil
@@ -282,19 +281,19 @@ public func host(_ str: String) -> URLFormat<Prelude.Unit> {
 public func host(_ f: PartialIso<String, String>) -> Parser<URLComponents, String> {
     return Parser<URLComponents, String>(
         parse: { format in
-            return format.host.flatMap { (host) in
-                f.apply(host).flatMap { v in
+            try format.host.flatMap { (host) in
+                try f.apply(host).flatMap { v in
                     (format.with { $0.host = nil }, v)
                 }
             }
     },
         print: { a in
-            f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 URLComponents().with { $0.host = s }
             }
     },
         template: { a in
-            f.unapply(a).flatMap { s in
+            try f.unapply(a).flatMap { s in
                 return URLComponents().with { $0.host = ":" + "\(type(of: a))" }
             }
     })

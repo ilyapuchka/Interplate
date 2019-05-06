@@ -1,5 +1,6 @@
 import Foundation
 import Prelude
+import CommonParsers
 
 open class Renderer {
     public init() {}
@@ -63,9 +64,8 @@ extension Template: TemplateType {
 #if swift(>=5.0)
 extension Template: ExpressibleByStringInterpolation {
 
-    public required init(stringInterpolation: Template.StringInterpolation) {
-        self.parts = stringInterpolation.parts
-        self.sourcePath = ""
+    public convenience init(stringInterpolation: Template.StringInterpolation) {
+        self.init(parts: stringInterpolation.parts)
     }
 
     public class StringInterpolation: StringInterpolationProtocol {

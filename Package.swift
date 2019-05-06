@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -9,10 +9,10 @@ let package = Package(
         .library(name: "Interplate", targets: ["Interplate"])
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-prelude.git", .branch("master"))
+        .package(url: "https://github.com/ilyapuchka/common-parsers.git", .branch("master"))
     ],
     targets: [
-        .target(name: "Interplate", dependencies: ["Prelude"]),
+        .target(name: "Interplate", dependencies: ["CommonParsers"]),
         .testTarget(name: "InterplateTests", dependencies: ["Interplate"])
     ]
 )
