@@ -151,7 +151,7 @@ extension NSObject: StringFormatting {
 
 extension Prelude.Unit: StringFormatting {
     static public var format: String { return "" }
-    public var arg: CVarArg { return "" }
+    public var arg: CVarArg { return NSString(string: "") }
 }
 
 extension Character: StringFormatting {
@@ -161,7 +161,7 @@ extension Character: StringFormatting {
 
 extension String: StringFormatting {
     static public var format: String { return "@" }
-    public var arg: CVarArg { return self }
+    public var arg: CVarArg { return NSString(string: self) }
 }
 
 extension CChar: StringFormatting {
