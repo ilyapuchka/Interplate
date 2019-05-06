@@ -151,7 +151,13 @@ extension NSObject: StringFormatting {
 
 extension Prelude.Unit: StringFormatting {
     static public var format: String { return "" }
-    public var arg: CVarArg { return NSString(string: "") }
+    public var arg: CVarArg {
+        #if canImport(ObjectiveC)
+        return ""
+        #else
+        return "".withCString { $0 }
+        #endif
+    }
 }
 
 extension Character: StringFormatting {
@@ -160,8 +166,13 @@ extension Character: StringFormatting {
 }
 
 extension String: StringFormatting {
+    #if canImport(ObjectiveC)
     static public var format: String { return "@" }
-    public var arg: CVarArg { return NSString(string: self) }
+    public var arg: CVarArg { return self }
+    #else
+    static public var format: String { return "s" }
+    public var arg: CVarArg { return self.withCString { $0 } }
+    #endif
 }
 
 extension CChar: StringFormatting {
@@ -184,7 +195,7 @@ extension CLongLong: StringFormatting {
     public var arg: CVarArg { return self }
 }
 
-#if os(macOS)
+#if canImport(ObjectiveC)
 extension Float80: StringFormatting {
     static public var format: String { return "Lf" }
     #if swift(>=5.0)
