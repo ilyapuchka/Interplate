@@ -27,7 +27,7 @@ public final class Template: ExpressibleByStringLiteral {
         self.sourcePath = ""
     }
 
-    public required init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.parts = [value]
         self.sourcePath = ""
     }
